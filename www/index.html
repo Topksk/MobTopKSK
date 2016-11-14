@@ -59,19 +59,6 @@
 						<input type="password" placeholder="{%=o.password%}" id="passwordField" />
 						<span id="visiblePassword" class="visiblePassword"></span>
 					</div>
-					<!--select class="listofitem">
-						<option value="1">one</option>
-						<option value="2">two</option>
-						<option value="3">three</option>
-					</select>
-					<div class="listofitem">
-					<select class="select2-searchable">
-						<option value="1">one</option>
-						<option value="2">two</option>
-						<option value="3">three</option>
-					</select>
-					</div-->
-
 					<div class="savePasswordCls">
 						<input type="checkbox" id="savePassword" />&nbsp;{%=o.save_password%}
 					</div>					
@@ -216,8 +203,8 @@
 					<label for="orderText" class="warning">{%=o.not_filled%}</label>
 					<textarea id="orderText" placeholder="{%=o.order_text%}"></textarea>
 					<div class="cameraButtons">						
-						<!--<span class="attachFileBtn"></span>-->
-						<input type="file" id="imageUploadBtn" />
+						<span class="attachFileBtn"></span>
+						<!--<input type="button" id="imageUploadBtn" />-->
 						<span class="cameraBtn"></span>
 					</div>					
 					<!--<input type="button" value="{%=o.send%}" id="orderSendBtn" />-->
@@ -364,8 +351,13 @@
 					<input type="text" id="addrFlatSub"/>
 					<label >{%=o.relation%}</label>
 					<label id="errAddrRel" class="warning">{%=o.not_filled%}</label>
-					<span><input name="addrRelation" type="radio" value="2">{%=o.owner%}</span>
-					<span><input name="addrRelation" type="radio" value="1">{%=o.citizen%}</span>
+					<div>
+						<input name="addrRelation" type="radio" value="2">{%=o.owner%}
+					</div>
+					<div>
+						<input name="addrRelation" type="radio" value="1">{%=o.citizen%}
+					</div>
+
 				</div>
 			</div>
 		</div>

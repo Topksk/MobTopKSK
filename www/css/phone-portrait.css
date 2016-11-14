@@ -592,6 +592,7 @@ input[type="date"]:valid:before {
     background-color: rgb(139, 184, 54);
     height: 40px;
     width: 40px;
+    margin-left: 10px;
 }
 
 .attachFileBtn {

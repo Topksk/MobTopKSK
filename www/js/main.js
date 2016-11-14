@@ -70,7 +70,7 @@ function setLanguage() {
     $("#contextMenuOpenBtn").show();
 }
 
-function getOrderReqType()
+function getOrderReqType(callback)
 {
     var langId = config.lang();
 
@@ -87,18 +87,21 @@ function getOrderReqType()
         contentType: 'application/json;charset=UTF-8',
         data: JSON.stringify(dataToPost),
         timeout: config.timeout,
-        async: false,
+        beforeSend : function(xhr, opts){
+            $(".overlay_progress").show();
+        },
         success: function (result) {                    
                 response = result;
+                callback(response)
         },
         error: function (jqXHR, textStatus, errorThrown) {
+        },
+        complete: function(){
         }
     });
-
-    return response;
 }
 
-function getStatuses()
+function getStatuses(callback)
 {
     var langId = config.lang();
 
@@ -115,18 +118,24 @@ function getStatuses()
         contentType: 'application/json;charset=UTF-8',
         data: JSON.stringify(dataToPost),
         timeout: config.timeout,
-        async: false,
+        beforeSend : function(xhr, opts){
+            $(".overlay_progress").show();
+        },
         success: function (result) {                    
                 response = result;
+                callback(response);
         },
         error: function (jqXHR, textStatus, errorThrown) {
+        },
+        complete: function(){
+            $(".overlay_progress").hide();
         }
     });
 
     return response;
 }
 
-function getUserAddress()
+function getUserAddress(callback)
 {
     var langId = config.lang();
 
@@ -143,16 +152,20 @@ function getUserAddress()
         type: 'post',
         contentType: 'application/json;charset=UTF-8',
         timeout: config.timeout,
+        beforeSend : function(xhr, opts){
+            $(".overlay_progress").show();
+        },
         data: JSON.stringify(dataToPost),
-        async: false,
         success: function (result) {                    
                 response = result;
+                callback(response);
         },
         error: function (jqXHR, textStatus, errorThrown) {
+        },
+        complete: function(){
+            $(".overlay_progress").hide();
         }
-    });
-
-    return response;    
+    });   
 }
 
 function Authorize() {
@@ -190,7 +203,7 @@ function Authorize() {
     });
 }
 
-function GetList(date, status, theme, notifid) {
+function GetList(date, status, theme, notifid, callback) {
 
     var response = {};
     var langId = config.lang();
@@ -214,12 +227,12 @@ function GetList(date, status, theme, notifid) {
         contentType: 'application/json;charset=UTF-8',
         data: JSON.stringify(dataToPost),
         timeout: config.timeout,
-        async: false,
         beforeSend : function(xhr, opts){
             $(".overlay_progress").show();
         },
         success: function (data, textStatus, request) {
-            response = data;            
+            response = data;
+            callback(response);
         },
         error: function (xhr, ajaxOptions, thrownError) {
             response = null;
@@ -233,19 +246,21 @@ function GetList(date, status, theme, notifid) {
 }
 
 function DrawNotifyList(){
-     $(".listData").html("");
-    var response = GetList("1111-11-11", 0, "", -1);
-    if(response != null)
-    {
-        var date2 ="";
-        for(var i = 0; i < response.length; i++)
+    $(".listData").html("");
+    var response = GetList("1111-11-11", 0, "", -1, function(response){
+        if(response != null)
         {
-            $(".listData").append("<li><div class=\"notif_sender_field\">" + response[i].notif_sender +
-                "</div><div class=\"notif_text_field\">" + response[i].notif_text + "</div><div class=\"id_field\">" + response[i].notif_number +
-                "</div><div class=\"type_field\">" + response[i].notif_theme + "</div><div class=\"state_field\">" + response[i].notif_status +
-                "</div><div class=\"date_field\">" + moment(response[i].dat_notif.substring(0, 19), 'YYYY-MM-DDTHH:mm:ss').format('DD.MM.YYYY') + "</div><div class=\"clear\"></div></li>");
+            var date2 ="";
+            for(var i = 0; i < response.length; i++)
+            {
+                $(".listData").append("<li><div class=\"notif_sender_field\">" + response[i].notif_sender +
+                    "</div><div class=\"notif_text_field\">" + response[i].notif_text + "</div><div class=\"id_field\">" + response[i].notif_number +
+                    "</div><div class=\"type_field\">" + response[i].notif_theme + "</div><div class=\"state_field\">" + response[i].notif_status +
+                    "</div><div class=\"date_field\">" + moment(response[i].dat_notif.substring(0, 19), 'YYYY-MM-DDTHH:mm:ss').format('DD.MM.YYYY') + "</div><div class=\"clear\"></div></li>");
+            }
         }
-    }
+    });
+    
 }
 
 function getCityList()
@@ -307,7 +322,6 @@ $("document").ready(function() {
         $("a.search").css("height", "80px");
         $("span.orderAddBtn").css("height", "80px");
         $("a.backBtn").css("height", "80px");
-        $("span.cameraBtn").css("display", "none");
     }
 
     getClientData();
@@ -394,6 +408,8 @@ $("document").ready(function() {
                 }
             });            
         }
+        
+
     });
     
     $(window).on('hashchange',function(){
@@ -404,7 +420,7 @@ $("document").ready(function() {
         var hash = window.location.hash;
         hash = hash.substring(1, hash.length);
 //alert('hashChange='+hash);
-        getClientData();
+        //getClientData();
         //alert(oClientData);
         //alert(JSON.stringify(oClientData));
 
@@ -417,7 +433,9 @@ $("document").ready(function() {
             $("#contextMenuOpenBtn").hide();            
         }
 
+
         // Авторизация
+
         if(hash == "" || hash == "mainPage" || hash == null)
         {
             if(config.authorized) {
@@ -443,6 +461,9 @@ $("document").ready(function() {
             }            
         }
 
+
+
+        
         $(".page").hide();
         $("#"+hash).css("display", "block");
 
@@ -451,24 +472,29 @@ $("document").ready(function() {
             $("#orderType option").not(':first').remove();
             $("#orderAddress option").not(':first').remove();
 
-            var reqtype = getOrderReqType();
+            getOrderReqType(function(reqtype){
+                for(var i = 0; i < reqtype.length; i++)
+                {
+                    $("#orderType").append($("<option/>", { 
+                        value: reqtype[i].id,
+                        text : reqtype[i].text 
+                    }));
+                }
+            });
 
-            for(var i = 0; i < reqtype.length; i++)
-            {
-                $("#orderType").append($("<option/>", { 
-                    value: reqtype[i].id,
-                    text : reqtype[i].text 
-                }));
-            }
-            var addresses = getUserAddress();
+            
+            getUserAddress(function(addresses){
+                for(var i = 0; i < addresses.length; i++)
+                {
+                    $("#orderAddress").append($("<option/>", { 
+                        value: addresses[i].id,
+                        text : addresses[i].text 
+                    }));
+                }
 
-            for(var i = 0; i < addresses.length; i++)
-            {
-                $("#orderAddress").append($("<option/>", { 
-                    value: addresses[i].id,
-                    text : addresses[i].text 
-                }));
-            }
+            });
+
+            
         }
         else if(hash == "orderListPage")
         {
@@ -494,7 +520,6 @@ $("document").ready(function() {
                 url: config.url.orderList,
                 type: 'post',
                 contentType: 'application/json;charset=UTF-8',
-                async: false,
                 timeout: config.timeout,
                 data: JSON.stringify(dataToPost),
                 beforeSend : function(xhr, opts){
@@ -532,7 +557,6 @@ $("document").ready(function() {
                 url: config.url.spr_oth,
                 type: 'post',
                 contentType: 'application/json;charset=UTF-8',
-                async: false,
                 timeout: config.timeout,
                 data: JSON.stringify(dataToPost),
                 beforeSend : function(xhr, opts){
@@ -555,6 +579,7 @@ $("document").ready(function() {
                         }
                         //new Date(response[i].dat_reg).toLocaleString('ru-RU')
                     }
+
                     document.location.href="#addrListPage";
                 },
                 error: function (result) {
@@ -581,33 +606,40 @@ $("document").ready(function() {
             $("#orderFilterAddress option").not(':first').remove();
             $("#orderFilterStatus option").remove();
 
-            var reqtype = getOrderReqType();
-            var addresses = getUserAddress();
-            var statuses = getStatuses();
+            getOrderReqType(function(reqtype){
+                for(var i = 0; i < reqtype.length; i++)
+                {
+                    $("#orderFilterType").append($("<option/>", { 
+                        value: reqtype[i].id,
+                        text : reqtype[i].text 
+                    }));
+                }
+            });
+            getUserAddress(function(addresses){
+                for(var i = 0; i < addresses.length; i++)
+                {
+                    $("#orderFilterAddress").append($("<option/>", { 
+                        value: addresses[i].id,
+                        text : addresses[i].text 
+                    }));
+                }
+            });
+            getStatuses(function(statuses){
+                for(var i = 0; i < statuses.length; i++)
+                {
+                    $("#orderFilterStatus").append($("<option/>", { 
+                        value: statuses[i].id,
+                        text : statuses[i].text 
+                    }));
+                }
 
-            for(var i = 0; i < reqtype.length; i++)
-            {
-                $("#orderFilterType").append($("<option/>", { 
-                    value: reqtype[i].id,
-                    text : reqtype[i].text 
-                }));
-            }
+            });
 
-            for(var i = 0; i < addresses.length; i++)
-            {
-                $("#orderFilterAddress").append($("<option/>", { 
-                    value: addresses[i].id,
-                    text : addresses[i].text 
-                }));
-            }
+            
 
-            for(var i = 0; i < statuses.length; i++)
-            {
-                $("#orderFilterStatus").append($("<option/>", { 
-                    value: statuses[i].id,
-                    text : statuses[i].text 
-                }));
-            }
+            
+
+            
 
         }
         else if(hash == "addrAddPage")
@@ -663,7 +695,7 @@ $("document").ready(function() {
         return pattern.test(emailAddress);
     };
 
-    function getImage(suid)
+    function getImage(suid, callback)
     {
         var dataToPost = {
             name: "cur_image",
@@ -677,9 +709,12 @@ $("document").ready(function() {
             contentType: 'application/json;charset=UTF-8',
             data: JSON.stringify(dataToPost),
             timeout: config.timeout,
-            async: false,
+            beforeSend : function(xhr, opts){
+                $(".overlay_progress").show();
+            },
             success: function (data, textStatus, request) {
                 response = data;
+                callback(response);
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 response = null;
@@ -691,7 +726,7 @@ $("document").ready(function() {
         return response;
     }
 
-    function getOrderByid(id)
+    function getOrderByid(id, callback)
     {
         var langId = config.lang();
 
@@ -708,13 +743,14 @@ $("document").ready(function() {
             type: 'post',
             contentType: 'application/json;charset=UTF-8',
             timeout: config.timeout,
-            async: false,
+            async: true,
             data: JSON.stringify(dataToPost),
             beforeSend : function(xhr, opts){
                 $(".overlay_progress").show();
             },
             success: function (result) {
                 response = result;
+                callback(response[0]);
             },
             error: function (result) {
                 response = [];
@@ -755,20 +791,12 @@ $("document").ready(function() {
             alert("file not formatted");
         };*/
 
-
-        //alert(734);
         $(".overlay_progress").show();
-        //alert(735);
         var reader = new FileReader();
-        //alert(736);
         reader.readAsDataURL(file);
-        //alert(737);
         reader.onload = function () {
-            //alert(738);
             var fileContent = this.result.substring(this.result.indexOf("base64") + 7);
-            //alert(739);
             var guid = config.guid();
-            //alert(740);
             filesToSend.push({
                 content: fileContent,
                 file: {},
@@ -778,22 +806,13 @@ $("document").ready(function() {
                 type: file.type,
                 req_id: guid
             });
-            //alert(741);
             $(".overlay_progress").hide();
-            //alert(742);
             drawBase64(this.result, guid);
-            //alert(743);
-
         };
-        //alert(744);
         reader.onerror = function (error) {
             alert("file not formatted");
             $(".overlay_progress").hide();
         };
-        //alert(745);
-
-
-
     }
 
     /*$(".attachFileBtn").on("click", function() {
@@ -812,15 +831,19 @@ $("document").ready(function() {
             contentType: 'application/json;charset=UTF-8',
             timeout: config.timeout,
             data: JSON.stringify(filesToSend),
-            async: false,
+            beforeSend : function(xhr, opts){
+                $(".overlay_progress").show();
+            },
             success: function (data, textStatus, request) {
                 response = data;
             },
             error: function (xhr, ajaxOptions, thrownError) {
+                alert("error");
                 response = null;
             },
             complete: function(data)
             {
+                $(".overlay_progress").hide();
                 document.location.href="#orderListPage";
             }
         });
@@ -880,7 +903,6 @@ $("document").ready(function() {
             url: config.url.orderList,
             type: 'post',
             contentType: 'application/json;charset=UTF-8',
-            async: false,
             timeout: config.timeout,
             data: JSON.stringify(dataToPost),
             beforeSend : function(xhr, opts){
@@ -917,19 +939,19 @@ $("document").ready(function() {
         var status = parseInt($("#notifyStatus").val());
         var theme = $("#notifyTheme").val();
         var id = ($("#notifyId").val() == "") ? -1 : parseInt($("#notifyId").val());
-        var response = GetList(date, status, theme, id);
-
-        if(response != null)
-        {
-            for(var i = 0; i < response.length; i++)
+        var response = GetList(date, status, theme, id, function(){
+            if(response != null)
             {
-                $(".listData").append("<li><div class=\"notif_sender_field\">" + response[i].notif_sender + "</div><div class=\"notif_text_field\">" +
-                    response[i].notif_text + "</div><div class=\"id_field\">" + response[i].notif_number + "</div><div class=\"type_field\">" +
-                    response[i].notif_theme + "</div><div class=\"state_field\">" + response[i].notif_status + "</div><div class=\"date_field\">" +
-                    moment(response[i].dat_notif.substring(0, 19), 'YYYY-MM-DDTHH:mm:ss').format('DD.MM.YYYY') + "</div><div class=\"clear\"></div></li>");
+                for(var i = 0; i < response.length; i++)
+                {
+                    $(".listData").append("<li><div class=\"notif_sender_field\">" + response[i].notif_sender + "</div><div class=\"notif_text_field\">" +
+                        response[i].notif_text + "</div><div class=\"id_field\">" + response[i].notif_number + "</div><div class=\"type_field\">" +
+                        response[i].notif_theme + "</div><div class=\"state_field\">" + response[i].notif_status + "</div><div class=\"date_field\">" +
+                        moment(response[i].dat_notif.substring(0, 19), 'YYYY-MM-DDTHH:mm:ss').format('DD.MM.YYYY') + "</div><div class=\"clear\"></div></li>");
+                }
             }
-        }
-        document.location.href="#notifyListPage";
+            document.location.href="#notifyListPage";
+        });
     });
 
     $(document).on("click","ul.listData li", function(){
@@ -949,7 +971,7 @@ $("document").ready(function() {
                 url: config.url.insReq,
                 type: 'post',
                 contentType: 'application/json;charset=UTF-8',
-                async: false,
+                async: true,
                 data: JSON.stringify({sqlpath: 'view_notification', notifid: Number($("#notifyLookUpId").val()), userId: 1}),
                 success: function (result) {
                     //search();
@@ -973,18 +995,24 @@ $("document").ready(function() {
         setTimeout(function(){
             document.location.href="#orderLookUpPage";
             var id = parseInt($(thisElem).find(".id_field").text());
-            var data = getOrderByid(id)[0];
-            var images = getImage(id);
-            $("#orderLookUpPhotoPage .content").html("");
-            for(var i = 0; i < images.length; i++)
-            {
-                $("#orderLookUpPhotoPage .content").append("<img src=" + config.url.root + images[i].file_id + " class=\"gallery\" />");
-            }
-            $("#orderSubTypeLookUp").val(data.req_subtype);
-            $("#orderTypeLookUp").val(data.req_type);
-            $("#orderAddressLookUp").val(data.req_address);
-            $("#orderUrgentLookUp").val(data.req_priority);
-            $("#orderLookUpText").val(data.req_note);            
+
+            getOrderByid(id, function(data){
+                $("#orderSubTypeLookUp").val(data.req_subtype);
+                $("#orderTypeLookUp").val(data.req_type);
+                $("#orderAddressLookUp").val(data.req_address);
+                $("#orderUrgentLookUp").val(data.req_priority);
+                $("#orderLookUpText").val(data.req_note);
+                getImage(id, function(images){
+                    $("#orderLookUpPhotoPage .content").html("");
+                    for(var i = 0; i < images.length; i++)
+                    {
+                        $("#orderLookUpPhotoPage .content").append("<img src=" + config.url.root + images[i].file_id + " class=\"gallery\" />");
+                    }
+                });
+            });
+
+            
+                   
         }, 500);        
     });
 
@@ -1126,9 +1154,41 @@ $("document").ready(function() {
         updateLanguage();
     });
 
-    $(document).on("change", "#imageUploadBtn", function(){
-        var file = document.querySelector('input[type=file]').files[0]
-        getBase64(file);        
+    $(document).on("click", ".attachFileBtn", function(){
+        //var file = document.querySelector('input[type=file]').files[0]
+        //getBase64(file);
+        $(".overlay_progress").show();
+        function uploadPhoto(fileName) {
+            getFileContentAsBase64(fileName, function(base64Image, fileSize, fileShortName, fileType, fileModifiedTime){                        
+                var fileContent = base64Image.substring(base64Image.indexOf("base64") + 7);
+                var guid = config.guid();                        
+                filesToSend.push({
+                    content: fileContent,
+                    file: {},
+                    modified: fileModifiedTime,
+                    name: fileShortName,
+                    size: fileSize,
+                    type: base64Image.substring(base64Image.indexOf(":") + 1, base64Image.indexOf(";")),
+                    req_id: guid
+                });
+
+                $(".overlay_progress").hide();
+                drawBase64(base64Image, guid);
+
+            });
+        };
+
+        navigator.camera.getPicture(
+            uploadPhoto,
+            function(message) {
+                alert('get picture failed');
+            }, 
+            {
+                quality: 100,
+                destinationType: navigator.camera.DestinationType.FILE_URI,
+                sourceType: navigator.camera.PictureSourceType.PHOTOLIBRARY
+            }
+        );
     });
 
     $(document).on("click", ".cameraBtn", function() {
@@ -1153,7 +1213,7 @@ $("document").ready(function() {
                             modified: fileModifiedTime,
                             name: fileShortName,
                             size: fileSize,
-                            type: fileType,
+                            type: base64Image.substring(base64Image.indexOf(":") + 1, base64Image.indexOf(";")),
                             req_id: guid
                         });
                         $(".overlay_progress").hide();
@@ -1246,7 +1306,7 @@ $("document").ready(function() {
                         type: 'post',
                         timeout: config.timeout,
                         contentType: 'application/json;charset=UTF-8',
-                        async: false,
+                        async: true,
                         data: JSON.stringify(dataToPost),
                         beforeSend: function (xhr, opts) {
                             $(".overlay_progress").show();
@@ -1262,7 +1322,6 @@ $("document").ready(function() {
                             alert("error occured while adding order");
                         },
                         complete: function (event, xhr, options) {
-                            $(".overlay_progress").hide();
                         }
                     });
                 }, 500);
@@ -1370,7 +1429,7 @@ $("document").ready(function() {
                         type: 'post',
                         timeout: config.timeout,
                         contentType: 'application/json;charset=UTF-8',
-                        async: false,
+                        async: true,
                         data: JSON.stringify(dataToPost),
                         success: function (result) {
                             //var req_id = parseInt(result);
@@ -1466,7 +1525,7 @@ $("document").ready(function() {
                         type: 'post',
                         timeout: config.timeout,
                         contentType: 'application/json;charset=UTF-8',
-                        async: false,
+                        async: true,
                         data: JSON.stringify(dataToPost),
                         beforeSend: function (xhr, opts) {
                             $(".overlay_progress").show();
