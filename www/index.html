@@ -43,28 +43,29 @@
 				<li link="languagePage">{%=o.language%}</li>
 				<li link="exit">{%=o.exit%}</li>
 			</ul>
-		</div>		
+		</div>
+
 		<div class="page" id="mainPage">
             <div class="header">
-				<span class = "header_text">{%=o.login_header_text%}</span>
+				<span class = "header_text" id="label_header">Войти в систему</span>
 				<span class = "language">&nbsp;</span>
 			</div>
 			
 			<div class="content">
 				<div class="form">
-					<label for="loginField" class="warning">{%=o.not_filled%}</label>
-					<input type="text" placeholder="{%=o.login%}" id="loginField" name="loginField"/>
-					<label for="passwordField" class="warning">{%=o.not_filled%}</label>
+					<label for="loginField" class="warning" id="label_login">{%=o.not_filled%}</label>
+					<input type="text" placeholder="Логин" id="loginField" name="loginField"/>
+					<label for="passwordField" class="warning" id="label_pass">{%=o.not_filled%}</label>
 					<div class="text-container">
-						<input type="password" placeholder="{%=o.password%}" id="passwordField" />
+						<input type="password" placeholder="Пароль" id="passwordField" />
 						<span id="visiblePassword" class="visiblePassword"></span>
 					</div>
-					<div class="savePasswordCls">
-						<input type="checkbox" id="savePassword" />&nbsp;{%=o.save_password%}
-					</div>					
-					<input type="button" value="{%=o.login_btn_text%}" id="loginBtn"/>
-					<a class="small" href="#forgotPassword">{%=o.restore_password_link%}</a>
-					<a class="small" href="#registration">{%=o.registration_link%}</a>
+						<div class="savePasswordCls">
+							<input type="checkbox" id="savePassword" /><a id="lsavePassword">&nbsp;Сохранить пароль</a>
+						</div>
+					<input type="button" value="Войти" id="loginBtn"/>
+					<a class="small" href="#forgotPassword" id="lforgotPassword">Восстановить пароль?</a>
+					<a class="small" href="#registration" id="lregistration">Регистрация</a>
 				</div>
 			</div>
             

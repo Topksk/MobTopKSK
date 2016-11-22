@@ -18,7 +18,7 @@ var config = {
         execFunc : rhost + "reqs/execFunc"
     },
     lang: function() {
-        return (localStorage.getItem("lang") == "RUS") ? 1 : 2;
+        return (localStorage.getItem("lang") == "KAZ") ? 2 : 1;
     },    
     guid: function () {
         function s4() {
@@ -33,7 +33,7 @@ var config = {
         rus: "RUS",
         kaz: "KAZ"
     },
-    authorized: false,
-    savePassword: false,
+    authorized: function() { return ((localStorage.getItem("authorized")) == "true" ? true : false)},
+    savePassword: ((localStorage.getItem("savePassword") == "true") ? true : false),
     availableContextMenu: ["notifyListPage", "orderListPage", "orderLookUpPage", "notifyLookUpPage", "languagePage", "addrListPage"]
 };

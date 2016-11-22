@@ -18,30 +18,52 @@ function getTranslate(pattern) {
     return (config.lang() == "1") ? RUS[pattern] : KAZ[pattern];
 }
 
-function getClientData() {
+function getClientData(callback) {
     //alert(config.url.current);
-    if (config.authorized) {
+    if (config.authorized()) {
         $.ajax({
             url: config.url.current,
             contentType: 'application/x-www-form-urlencoded',
-            crossDomain: true,
-            processData: false,
-            timeout: this.timeout,
-            cache: false,
-            async: false,
             success: function(data){
                 oClientData=data;
                 $("#firstName").text(oClientData.user_info.first_name);
-                config.authorized = true;
+                callback();
             },
             error: function(xhr, ajaxOptions, thrownError){
-                config.authorized = false;
+                alert('getClientData, thrownError='+JSON.stringify(thrownError))
             }
         });
     }
 }
 
+function Login(login, password, callback)
+{
+    $.ajax({
+        url: config.url.login,
+        data: "role="+login+"&password="+password+"&authurl=login.html",
+        contentType: 'application/x-www-form-urlencoded',
+        timeout: config.timeout,
+        type: 'POST',
+        processData: false,
+        crossDomain: true,
+        beforeSend : function(xhr, opts){
+            $(".overlay_progress").show();
+        },
+        success: function(data){
+            callback();
+        },
+        error: function(xhr, ajaxOptions, thrownError){
+            alert("please check the internet connection");
+            alert(JSON.stringify(thrownError));
+        },
+        complete: function(event,xhr,options) {
+            $(".overlay_progress").hide();
+        }
+    });
+}
+
 function setLanguage() {
+//alert('setLanguage config.savePassword='+config.savePassword);
     if(!config.savePassword) {
         $("#loginField").val(null);
         $("#passwordField").val(null);
@@ -54,6 +76,7 @@ function setLanguage() {
         $("#savePassword").prop("checked", true);
     }
     var langTxt = config.langList.kaz;
+
     if(localStorage.getItem("lang") == langTxt)
     {
         langTxt = config.langList.kaz;
@@ -65,9 +88,22 @@ function setLanguage() {
         langData = RUS;
         $(".language").text(langTxt);
     }
+    //alert('setLanguage langTxt='+langTxt);
 
     $("#languageList").val(langTxt);
+
+    $("#label_header").text(getTranslate("login_header_text"));
+    $("#loginField").attr("placeholder",getTranslate("login"));
+    $("#passwordField").attr("placeholder",getTranslate("password"));
+    $("#loginBtn").val(getTranslate("login_btn_text"));
+    $("#lsavePassword").text(getTranslate("save_password"));
+
+    $("#lforgotPassword").text(getTranslate("restore_password_link"));
+    $("#lregistration").text(getTranslate("registration_link"));
+
+
     $("#contextMenuOpenBtn").show();
+    //alert('end');
 }
 
 function getOrderReqType(callback)
@@ -181,16 +217,18 @@ function Authorize() {
                 $("#loginField").val(null);
                 $("#passwordField").val(null);
                 localStorage.removeItem("login");
-                localStorage.removeItem("password");              
+                localStorage.removeItem("password");
+                localStorage.removeItem("savePassword");
             }
             else
             {
                 localStorage.setItem("login", $("#loginField").val());
                 localStorage.setItem("password", $("#passwordField").val());
+                localStorage.setItem("savePassword", true);
             }
             $("#firstName").text(data.user_info.first_name);
             //window.plugins.PushbotsPlugin.updateAlias(data.user_info.recid);
-            config.authorized = true;
+            localStorage.setItem("authorized", "true");
             $(this).attr("type", "password");
             $("#visiblePassword").removeClass("visiblePassword-show");
             localStorage.setItem("userFirstName", data.user_info.first_name);
@@ -199,6 +237,7 @@ function Authorize() {
         },
         error: function(xhr, ajaxOptions, thrownError){
             alert("Authorize fails");
+            alert("thrownError="+JSON.stringify(thrownError));
         }
     });
 }
@@ -312,7 +351,6 @@ function getStreetList(city_id)
     return response;
 }
 
-
 $("document").ready(function() {
     if (navigator.userAgent.match(/(iPod|iPhone|iPad)/)) {
         $("div.header").css("height", "80px");
@@ -324,11 +362,18 @@ $("document").ready(function() {
         $("a.backBtn").css("height", "80px");
     }
 
-    getClientData();
-    hashChange();
-    body_copy = $("body").html();
-    //alert($("#loginField").val());
 
+    var login = localStorage.getItem("login");
+    var password = localStorage.getItem("password");
+    if(config.authorized())
+    {
+        Login(login, password, function(){
+            getClientData(function(){
+                hashChange();
+            });
+        });
+    }
+    body_copy = $("body").html();
 
     $("body").html(tmpl(body_copy, langData));
 
@@ -354,75 +399,11 @@ $("document").ready(function() {
         $("#firstName").text(localStorage.getItem("userFirstName"));
     }
 
-    $(document).on("click", "#loginBtn", function(){
-        //$("#loginField").val('gabit.omarov@gmail.com');
-        //$("#passwordField").val('orapas$123');
-
-        var login = $("#loginField").val().trim();
-        var password = $("#passwordField").val().trim();
-        var validated = true;
-        if(login == "")
-        {
-            $("[for=\"loginField\"]").show();
-            validated = false;
-        }
-        else
-        {
-            $("[for=\"loginField\"]").hide();
-        }
-
-        if(password == "")
-        {
-            $("[for=\"passwordField\"]").show();
-            validated = false;
-        }
-        else
-        {
-            $("[for=\"passwordField\"]").hide();
-        }
-
-        if(validated)
-        {
-//alert(config.url.login);
-            $.ajax({
-                url: config.url.login,
-                data: "role="+login+"&password="+password+"&authurl=login.html",
-                contentType: 'application/x-www-form-urlencoded',
-                timeout: config.timeout,
-                type: 'POST',
-                processData: false,
-                crossDomain: true,
-                beforeSend : function(xhr, opts){
-                    $(".overlay_progress").show();
-                },
-                success: function(data){
-                    Authorize();
-                },
-                error: function(xhr, ajaxOptions, thrownError){
-                    alert("please check the internet connection");
-                    alert(thrownError);
-                    alert(JSON.stringify(thrownError));
-                },
-                complete: function(event,xhr,options) {
-                    $(".overlay_progress").hide();
-                }
-            });            
-        }
-        
-
-    });
-    
-    $(window).on('hashchange',function(){
-        hashChange();           
-    });
-
     function hashChange() {
         var hash = window.location.hash;
         hash = hash.substring(1, hash.length);
-//alert('hashChange='+hash);
         //getClientData();
-        //alert(oClientData);
-        //alert(JSON.stringify(oClientData));
+        //alert("hashChange.hash="+hash);
 
         if(config.availableContextMenu.indexOf(hash) != -1)
         {
@@ -433,12 +414,10 @@ $("document").ready(function() {
             $("#contextMenuOpenBtn").hide();            
         }
 
-
         // Авторизация
-
         if(hash == "" || hash == "mainPage" || hash == null)
         {
-            if(config.authorized) {
+            if(config.authorized()) {
                 //window.history.forward();
                 //return;
                 hash = "notifyListPage";
@@ -450,8 +429,9 @@ $("document").ready(function() {
                 return;
             }
         }
-        else {
-            if(!config.authorized) {
+        else
+        {
+            if(!config.authorized()) {
                 if(hash != "forgotPassword" && hash != "registration")
                 {
                     $(".page").hide();
@@ -461,9 +441,6 @@ $("document").ready(function() {
             }            
         }
 
-
-
-        
         $(".page").hide();
         $("#"+hash).css("display", "block");
 
@@ -481,7 +458,6 @@ $("document").ready(function() {
                     }));
                 }
             });
-
             
             getUserAddress(function(addresses){
                 for(var i = 0; i < addresses.length; i++)
@@ -493,8 +469,6 @@ $("document").ready(function() {
                 }
 
             });
-
-            
         }
         else if(hash == "orderListPage")
         {
@@ -591,7 +565,7 @@ $("document").ready(function() {
         }
         else if(hash == "feedbackAddPage")
         {
-            if (config.authorized){
+            if (config.authorized()){
                 $('#feedbackfio').val(oClientData.user_info.first_name+' '+oClientData.user_info.last_name);
                 $('#feedbackphone').val(oClientData.user_info.phone_number);
                 $('#feedbackemail').val(oClientData.user_info.email);
@@ -634,17 +608,10 @@ $("document").ready(function() {
                 }
 
             });
-
-            
-
-            
-
-            
-
         }
         else if(hash == "addrAddPage")
         {
-            if (config.authorized){
+            if (config.authorized()){
                 $(".overlay_progress").show();
                 $("#addrCity").html('');
                 var citylist = getCityList();
@@ -667,7 +634,7 @@ $("document").ready(function() {
             $('#addrFlatSub').mask('/?/////////', {placeholder: ""});
 
         }
-        else if(hash == "exit" && config.authorized)
+        else if(hash == "exit" && config.authorized())
         {
             $.ajax({
                 url: config.url.logout,
@@ -675,18 +642,15 @@ $("document").ready(function() {
                 timeout: config.timeout,
                 data: {},
                 success: function() {
-                    config.authorized = false;
+                    localStorage.setItem("authorized", "false");
+                    document.location.hash = "";
                 },
                 error: function() {
                     //todo: 
                 },
                 complete: function() {                    
-                    document.location.hash = "";
                 }
             });               
-        }
-        else {
-//alert('hash='+hash);
         }
     };
 
@@ -763,62 +727,6 @@ $("document").ready(function() {
         return response;
     }
 
-    function getBase64(file) {
-        //return "";
-        //alert('getBase64 begin');
-        //alert(file.lastModifiedDate.toISOString());
-        /*$(".overlay_progress").show();
-        var reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = function () {
-            var fileContent = this.result.substring(this.result.indexOf("base64") + 7);
-            var guid = config.guid();
-            filesToSend.push({
-                content: fileContent,
-                file: {},
-                modified: new Date(file.lastModifiedDate).toISOString(),
-                name: file.name,
-                size: file.size,
-                type: file.type,
-                req_id: guid
-            });
-
-            $(".overlay_progress").hide();
-            drawBase64(this.result, guid);
-
-        };
-        reader.onerror = function (error) {
-            alert("file not formatted");
-        };*/
-
-        $(".overlay_progress").show();
-        var reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = function () {
-            var fileContent = this.result.substring(this.result.indexOf("base64") + 7);
-            var guid = config.guid();
-            filesToSend.push({
-                content: fileContent,
-                file: {},
-                modified: new Date(file.lastModifiedDate).toISOString(),
-                name: file.name,
-                size: file.size,
-                type: file.type,
-                req_id: guid
-            });
-            $(".overlay_progress").hide();
-            drawBase64(this.result, guid);
-        };
-        reader.onerror = function (error) {
-            alert("file not formatted");
-            $(".overlay_progress").hide();
-        };
-    }
-
-    /*$(".attachFileBtn").on("click", function() {
-     $("#imageUploadBtn").trigger("click");
-     });*/
-
     function drawBase64(base64Image, guid) {
         $(".cameraButtons").after("<div class=\"upload-images\" index="+guid+">\
             <img src="+base64Image+" /><span class=\"file-delete-button\"></span>\
@@ -874,7 +782,67 @@ $("document").ready(function() {
         }
     }
 
-    $(document).on("click","#orderFilterBtn", function(){
+    $(window).on('hashchange',function(){
+        hashChange();
+    });
+
+    $(document).on("click", "#loginBtn", function(){
+        //$("#loginField").val('gabit.omarov@gmail.com');
+        //$("#passwordField").val('orapas$123');
+
+        var login = $("#loginField").val().trim();
+        var password = $("#passwordField").val().trim();
+        var validated = true;
+        if(login == "")
+        {
+            $("[for=\"loginField\"]").show();
+            validated = false;
+        }
+        else
+        {
+            $("[for=\"loginField\"]").hide();
+        }
+
+        if(password == "")
+        {
+            $("[for=\"passwordField\"]").show();
+            validated = false;
+        }
+        else
+        {
+            $("[for=\"passwordField\"]").hide();
+        }
+
+        if(validated)
+        {
+//alert(config.url.login);
+            $.ajax({
+                url: config.url.login,
+                data: "role="+login+"&password="+password+"&authurl=login.html",
+                contentType: 'application/x-www-form-urlencoded',
+                timeout: config.timeout,
+                type: 'POST',
+                processData: false,
+                crossDomain: true,
+                beforeSend : function(xhr, opts){
+                    $(".overlay_progress").show();
+                },
+                success: function(data){
+                    Authorize();
+                },
+                error: function(xhr, ajaxOptions, thrownError){
+                    alert("please check the internet connection");
+                    alert(JSON.stringify(thrownError));
+                },
+                complete: function(event,xhr,options) {
+                    $(".overlay_progress").hide();
+                }
+            });            
+        }
+        
+
+    });
+    $(document).on("click", "#orderFilterBtn", function(){
         var langId = config.lang();
         var dataToPost = {};
         if($("#orderId").val().trim() == "")
@@ -932,7 +900,7 @@ $("document").ready(function() {
 
     });
 
-    $(document).on("click","#notifyFilterSearchBtn", function(){
+    $(document).on("click", "#notifyFilterSearchBtn", function(){
         $(".listData").html("");
         //alert("notifyFilterSearchBtn");
         var date = $("#notifyDate").val();
@@ -954,7 +922,7 @@ $("document").ready(function() {
         });
     });
 
-    $(document).on("click","ul.listData li", function(){
+    $(document).on("click", "ul.listData li", function(){
         var thisElem = this;
         $(".overlay_progress").show();
         setTimeout(function(){
@@ -989,7 +957,7 @@ $("document").ready(function() {
         
     });
     
-    $(document).on("click","ul.listOrderData li", function(){
+    $(document).on("click", "ul.listOrderData li", function(){
         var thisElem = this;
         $(".overlay_progress").show();
         setTimeout(function(){
@@ -1016,7 +984,7 @@ $("document").ready(function() {
         }, 500);        
     });
 
-    $(document).on("click","ul.listAddrData li", function(){
+    $(document).on("click", "ul.listAddrData li", function(){
         var thisElem = this;
         //alert('listAddrData, '+ $(thisElem).find(".notif_id_field").text());
         /*$(".overlay_progress").show();
@@ -1038,11 +1006,11 @@ $("document").ready(function() {
         }, 500);*/
     });
 
-    $(document).on("click","#orderPhotoShowBtn", function(){
+    $(document).on("click", "#orderPhotoShowBtn", function(){
         document.location.hash = "orderLookUpPhotoPage";
     });
     
-    $(document).on("click","#reg_btn", function(){
+    $(document).on("click", "#reg_btn", function(){
         var dataToPost = {
             email: $('#reg_email').val(),
             password: $('#reg_password').val(),
@@ -1123,7 +1091,7 @@ $("document").ready(function() {
         });
     });
 
-    $(document).on("click","#restore_btn", function(){
+    $(document).on("click", "#restore_btn", function(){
         var email = $("#restore_email").val();
         if(isValidEmailAddress(email))
         {
@@ -1142,12 +1110,6 @@ $("document").ready(function() {
         {
              alert("messages.invalidLogin");
         }
-    });
-
-    $(document).on("change", "#languageList", function(){
-        updateLanguage();
-        $(".page").hide();
-        $("#languagePage").show();
     });
 
     $(document).on("click", ".language", function(){
@@ -1555,15 +1517,6 @@ $("document").ready(function() {
         }
     });
 
-    $(document).on("keyup", "#passwordField", function(){
-        if ($(this).val()) {
-            $("#visiblePassword").addClass("visiblePassword-show");
-        } else {
-            $(this).attr("type", "password");
-            $("#visiblePassword").removeClass("visiblePassword-show");
-        }
-    });
-
     $(document).on("click", "#visiblePassword", function(){
         var elem = $("#passwordField");
         var type = elem.attr("type");
@@ -1579,7 +1532,7 @@ $("document").ready(function() {
     });
 
     $(document).on("click", ".savePasswordCls", function(){
-        if($("#savePassword").prop("checked")){
+        if(config.savePassword){
             $("#savePassword").prop("checked", false);
             config.savePassword = false;
         }
@@ -1594,6 +1547,21 @@ $("document").ready(function() {
         $(".overlay").fadeOut("slow", function() {
             $("#contextMenuOpenBtn").show();
         });
+    });
+
+    $(document).on("keyup", "#passwordField", function(){
+        if ($(this).val()) {
+            $("#visiblePassword").addClass("visiblePassword-show");
+        } else {
+            $(this).attr("type", "password");
+            $("#visiblePassword").removeClass("visiblePassword-show");
+        }
+    });
+
+    $(document).on("change", "#languageList", function(){
+        updateLanguage();
+        $(".page").hide();
+        $("#languagePage").show();
     });
 
     $(document).on("change", "#addrCity", function(){
