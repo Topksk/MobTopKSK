@@ -236,8 +236,8 @@ function Authorize() {
             DrawNotifyList();
         },
         error: function(xhr, ajaxOptions, thrownError){
-            alert("Authorize fails");
-            alert("thrownError="+JSON.stringify(thrownError));
+            alert(getTranslate("auth_fail"));
+            //alert("thrownError="+JSON.stringify(thrownError));
         }
     });
 }
