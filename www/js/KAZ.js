@@ -1,5 +1,5 @@
 var KAZ = {
-    "login_header_text": "Жүйеге кіру, v.1.0.6h",
+    "login_header_text": "Жүйеге кіру, v.1.0.6",
     "login": "Логин",
     "password": "Құпия сөз",
     "login_btn_text": "Кіру",

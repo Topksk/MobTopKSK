@@ -20,7 +20,7 @@ function getTranslate(pattern) {
 
 function getClientData(callback) {
     //alert(config.url.current);
-    if (config.authorized()) {
+    if (config.authorized() && (config.login()!=null)) {
         $.ajax({
             url: config.url.current,
             contentType: 'application/x-www-form-urlencoded',
@@ -30,7 +30,8 @@ function getClientData(callback) {
                 callback();
             },
             error: function(xhr, ajaxOptions, thrownError){
-                alert('getClientData, thrownError='+JSON.stringify(thrownError))
+                alert('getClientData, thrownError33='+JSON.stringify(thrownError));
+                alert(JSON.stringify(localStorage));
             }
         });
     }
@@ -63,7 +64,6 @@ function Login(login, password, callback)
 }
 
 function setLanguage() {
-//alert('setLanguage config.savePassword='+config.savePassword);
     if(!config.savePassword) {
         $("#loginField").val(null);
         $("#passwordField").val(null);
@@ -88,10 +88,7 @@ function setLanguage() {
         langData = RUS;
         $(".language").text(langTxt);
     }
-    //alert('setLanguage langTxt='+langTxt);
-
     $("#languageList").val(langTxt);
-
     $("#label_header").text(getTranslate("login_header_text"));
     $("#loginField").attr("placeholder",getTranslate("login"));
     $("#passwordField").attr("placeholder",getTranslate("password"));
@@ -101,9 +98,7 @@ function setLanguage() {
     $("#lforgotPassword").text(getTranslate("restore_password_link"));
     $("#lregistration").text(getTranslate("registration_link"));
 
-
     $("#contextMenuOpenBtn").show();
-    //alert('end');
 }
 
 function getOrderReqType(callback)
@@ -402,9 +397,6 @@ $("document").ready(function() {
     function hashChange() {
         var hash = window.location.hash;
         hash = hash.substring(1, hash.length);
-        //getClientData();
-        //alert("hashChange.hash="+hash);
-
         if(config.availableContextMenu.indexOf(hash) != -1)
         {
             $("#contextMenuOpenBtn").show();
@@ -787,9 +779,6 @@ $("document").ready(function() {
     });
 
     $(document).on("click", "#loginBtn", function(){
-        //$("#loginField").val('gabit.omarov@gmail.com');
-        //$("#passwordField").val('orapas$123');
-
         var login = $("#loginField").val().trim();
         var password = $("#passwordField").val().trim();
         var validated = true;
@@ -899,7 +888,6 @@ $("document").ready(function() {
         });
 
     });
-
     $(document).on("click", "#notifyFilterSearchBtn", function(){
         $(".listData").html("");
         //alert("notifyFilterSearchBtn");
