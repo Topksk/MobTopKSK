@@ -20,7 +20,6 @@ $(document).hammer({domEvents:true}).on("tap", "ul.menuList li", function() {
     {
         document.location.hash = $(this).attr("link");
     }
-    
     openAndCloseMenu();
 });
 

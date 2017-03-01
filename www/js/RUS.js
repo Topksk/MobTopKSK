@@ -1,5 +1,5 @@
 var RUS = {
-    "login_header_text": "Войти в систему, v.1.0.6",
+    "login_header_text": "Войти в систему TopKSK",
     "login": "Логин",
     "password": "Пароль",
     "login_btn_text": "Войти",
@@ -13,7 +13,7 @@ var RUS = {
     "registration": "Регистрация",
     "send": "Отправить",
     "email": "Email",
-    "send_order": "Сообщить о проблеме",
+    "send_order": "Создать заявку",
     "not_readed": "Не прочитано",
     "notif_status": "Статус",
     "readed": "Прочитано",
@@ -49,7 +49,7 @@ var RUS = {
     "notify_list_header": "Уведомления",
     "language": "Поменять язык",
     "order_photos": "Фото заявления",
-    "save_password": "Сохранить пароль",
+    "save_password": "Запомнить меня",
     "order_urgent": "Срочность",
     "order_finish_time": "Срок исполнения",
     "feed_text": "Сообщение",
@@ -67,5 +67,8 @@ var RUS = {
     "citizen": "Житель",
     "addr_exists": "У вас уже имеется данный адрес в списке",
     "ksknotfound": "КСК обслуживающий данный адрес пока не найден",
-    "auth_fail": "Неверный логин или пароль"
+    "auth_fail": "Неверный логин или пароль",
+    "email_not_found": "К сожалению, пользователь с таким email не найден",
+    "resetPasswordMailSent": "Письмо с инструкциями по сбросу пароля отправлено вам на электронную почту",
+    "invalidLogin": "Неверный логин"
 };

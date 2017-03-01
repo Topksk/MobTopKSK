@@ -10,11 +10,8 @@ Date.prototype.toDateInputValue = (function() {
     return local.toJSON().slice(0,10);
 });
 
-function loadingBarShow() {
-    document.getElementsByClassName("overlay_progress")[0].style.display = "inline";
-}
-
-function getTranslate(pattern) {
+function getTranslate(pattern)
+{
     return (config.lang() == "1") ? RUS[pattern] : KAZ[pattern];
 }
 
@@ -51,11 +48,20 @@ function Login(login, password, callback)
             $(".overlay_progress").show();
         },
         success: function(data){
+            //alert('2.login='+login+', to OneSignal');
+            //window.plugins.OneSignal.syncHashedEmail(login);
+            //window.plugins.OneSignal.sendTag("key2", "value2");
+            window.plugins.OneSignal.sendTag("email", login.toLowerCase());
+            //window.plugins.OneSignal.getIds(function(ids) {
+                //alert('1.getIds: ' + JSON.stringify(ids));
+                //alert("userId = " + ids.userId + ", pushToken = " + ids.pushToken);
+            //});
             callback();
         },
         error: function(xhr, ajaxOptions, thrownError){
             alert("please check the internet connection");
-            alert(JSON.stringify(thrownError));
+            alert(config.url.login +', line 58,'+JSON.stringify(thrownError));
+            Logout();
         },
         complete: function(event,xhr,options) {
             $(".overlay_progress").hide();
@@ -63,7 +69,27 @@ function Login(login, password, callback)
     });
 }
 
-function setLanguage() {
+function Logout()
+{
+    $.ajax({
+        url: config.url.logout,
+        type: 'POST',
+        timeout: config.timeout,
+        data: {},
+        success: function() {
+            localStorage.setItem("authorized", "false");
+            document.location.hash = "";
+        },
+        error: function() {
+            alert('Error in logout');
+        },
+        complete: function() {
+        }
+    });
+}
+
+function setLanguage()
+{
     if(!config.savePassword) {
         $("#loginField").val(null);
         $("#passwordField").val(null);
@@ -76,7 +102,6 @@ function setLanguage() {
         $("#savePassword").prop("checked", true);
     }
     var langTxt = config.langList.kaz;
-
     if(localStorage.getItem("lang") == langTxt)
     {
         langTxt = config.langList.kaz;
@@ -90,15 +115,22 @@ function setLanguage() {
     }
     $("#languageList").val(langTxt);
     $("#label_header").text(getTranslate("login_header_text"));
-    $("#loginField").attr("placeholder",getTranslate("login"));
-    $("#passwordField").attr("placeholder",getTranslate("password"));
     $("#loginBtn").val(getTranslate("login_btn_text"));
     $("#lsavePassword").text(getTranslate("save_password"));
 
     $("#lforgotPassword").text(getTranslate("restore_password_link"));
     $("#lregistration").text(getTranslate("registration_link"));
+    var hash = window.location.hash;
+    hash = hash.substring(1, hash.length);
+    if(config.availableContextMenu.indexOf(hash) != -1)
+    {
+        $("#contextMenuOpenBtn").show();
+    }
+    else
+    {
+        $("#contextMenuOpenBtn").hide();
+    }
 
-    $("#contextMenuOpenBtn").show();
 }
 
 function getOrderReqType(callback)
@@ -126,6 +158,7 @@ function getOrderReqType(callback)
                 callback(response)
         },
         error: function (jqXHR, textStatus, errorThrown) {
+            alert('Error in req_type list');
         },
         complete: function(){
         }
@@ -157,6 +190,7 @@ function getStatuses(callback)
                 callback(response);
         },
         error: function (jqXHR, textStatus, errorThrown) {
+            alert('Error in req_status list');
         },
         complete: function(){
             $(".overlay_progress").hide();
@@ -192,6 +226,7 @@ function getUserAddress(callback)
                 callback(response);
         },
         error: function (jqXHR, textStatus, errorThrown) {
+            alert('Error in user_addr list');
         },
         complete: function(){
             $(".overlay_progress").hide();
@@ -199,7 +234,8 @@ function getUserAddress(callback)
     });   
 }
 
-function Authorize() {
+function Authorize()
+{
     $.ajax({
         url: config.url.current,
         contentType: 'application/x-www-form-urlencoded',
@@ -237,8 +273,8 @@ function Authorize() {
     });
 }
 
-function GetList(date, status, theme, notifid, callback) {
-
+function GetList(date, status, theme, notifid, callback)
+{
     var response = {};
     var langId = config.lang();
 
@@ -270,6 +306,7 @@ function GetList(date, status, theme, notifid, callback) {
         },
         error: function (xhr, ajaxOptions, thrownError) {
             response = null;
+            alert('Error in get_notif');
         },
         complete: function(event,xhr,options) {
             $(".overlay_progress").hide();
@@ -279,7 +316,8 @@ function GetList(date, status, theme, notifid, callback) {
     return response;
 }
 
-function DrawNotifyList(){
+function DrawNotifyList()
+{
     $(".listData").html("");
     var response = GetList("1111-11-11", 0, "", -1, function(response){
         if(response != null)
@@ -316,6 +354,7 @@ function getCityList()
             response = result;
         },
         error: function (jqXHR, textStatus, errorThrown) {
+            alert('Error in all_city list');
         }
     });
     return response;
@@ -341,12 +380,14 @@ function getStreetList(city_id)
             response = result;
         },
         error: function (jqXHR, textStatus, errorThrown) {
+            alert('Error in all_street1 list');
         }
     });
     return response;
 }
 
-$("document").ready(function() {
+$("document").ready(function()
+{
     if (navigator.userAgent.match(/(iPod|iPhone|iPad)/)) {
         $("div.header").css("height", "80px");
         $("div.header").css("line-height", "80px");
@@ -356,7 +397,6 @@ $("document").ready(function() {
         $("span.orderAddBtn").css("height", "80px");
         $("a.backBtn").css("height", "80px");
     }
-
 
     var login = localStorage.getItem("login");
     var password = localStorage.getItem("password");
@@ -389,9 +429,10 @@ $("document").ready(function() {
         var index = ((langItems.indexOf(lang) + 1) == langItems.length) ? 0 : langItems.indexOf(lang) + 1;        
         localStorage.setItem("lang",  langItems[index]);        
         $(".language").text(langItems[index]);
-        setLanguage();        
-        $("body").html(tmpl(body_copy, langData)); 
+        setLanguage();
+        $("body").html(tmpl(body_copy, langData));
         $("#firstName").text(localStorage.getItem("userFirstName"));
+        $(".overlay_progress").hide();
     }
 
     function hashChange() {
@@ -414,6 +455,7 @@ $("document").ready(function() {
                 //return;
                 hash = "notifyListPage";
                 DrawNotifyList();
+                $("#contextMenuOpenBtn").show();
             }
             else {
                 $(".page").hide();
@@ -509,6 +551,7 @@ $("document").ready(function() {
                     document.location.href="#orderListPage";
                 },
                 error: function (result) {
+                    alert('Error in reqs list');
                 },
                 complete: function(event,xhr,options) {
                     $(".overlay_progress").hide();
@@ -530,7 +573,6 @@ $("document").ready(function() {
                 },
                 success: function (response) {
                     $(".listAddrData").html("");
-//alert(JSON.stringify(response));
                     if(response != null)
                     {
                         for(var i = 0; i < response.length; i++)
@@ -549,6 +591,7 @@ $("document").ready(function() {
                     document.location.href="#addrListPage";
                 },
                 error: function (result) {
+                    alert('Error in cit_addr list');
                 },
                 complete: function(event,xhr,options) {
                     $(".overlay_progress").hide();
@@ -628,21 +671,7 @@ $("document").ready(function() {
         }
         else if(hash == "exit" && config.authorized())
         {
-            $.ajax({
-                url: config.url.logout,
-                type: 'POST',
-                timeout: config.timeout,
-                data: {},
-                success: function() {
-                    localStorage.setItem("authorized", "false");
-                    document.location.hash = "";
-                },
-                error: function() {
-                    //todo: 
-                },
-                complete: function() {                    
-                }
-            });               
+            Logout();
         }
     };
 
@@ -651,16 +680,15 @@ $("document").ready(function() {
         return pattern.test(emailAddress);
     };
 
-    function getImage(suid, callback)
+    function getImage(suid, tabName, callback)
     {
         var dataToPost = {
-            name: "cur_image",
-            sid: parseInt(suid)
+            sqlpath: 'sprav/cur_image',
+                sid: parseInt(suid),
+            tab_name: tabName
         };
-
         var response = {};
-
-        $.ajax({url: config.url.imageUrl,
+        $.ajax({url: config.url.spr_oth,
             type: 'post',
             contentType: 'application/json;charset=UTF-8',
             data: JSON.stringify(dataToPost),
@@ -674,6 +702,7 @@ $("document").ready(function() {
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 response = null;
+                alert('Error in img_url list');
             },
             complete: function(event,xhr,options) {
                 $(".overlay_progress").hide();
@@ -710,6 +739,7 @@ $("document").ready(function() {
             },
             error: function (result) {
                 response = [];
+                alert('Error in reqs by id list');
             },
             complete: function(event,xhr,options) {
                 $(".overlay_progress").hide();
@@ -725,7 +755,9 @@ $("document").ready(function() {
         </div>");
     }
 
-    function sendImageXHR() {
+    function sendImageXHR(tab_id, tab_name) {
+        filesToSend[0].tableId=parseInt(tab_id);
+        filesToSend[0].table_name=tab_name;
         $.ajax({url: config.url.uploadImage2,
             type: 'post',
             contentType: 'application/json;charset=UTF-8',
@@ -738,7 +770,7 @@ $("document").ready(function() {
                 response = data;
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                alert("error");
+                alert('Error in upl_img');
                 response = null;
             },
             complete: function(data)
@@ -782,6 +814,7 @@ $("document").ready(function() {
         var login = $("#loginField").val().trim();
         var password = $("#passwordField").val().trim();
         var validated = true;
+        var s_err_text = "";
         if(login == "")
         {
             $("[for=\"loginField\"]").show();
@@ -804,7 +837,6 @@ $("document").ready(function() {
 
         if(validated)
         {
-//alert(config.url.login);
             $.ajax({
                 url: config.url.login,
                 data: "role="+login+"&password="+password+"&authurl=login.html",
@@ -817,11 +849,24 @@ $("document").ready(function() {
                     $(".overlay_progress").show();
                 },
                 success: function(data){
+                    //alert('1.login='+login+', to OneSignal');
+                    //window.plugins.OneSignal.syncHashedEmail(login);
+                    //s_err_text = window.plugins.OneSignal.syncHashedEmail(login);
+                    //alert(s_err_text);
+                    //alert(JSON.stringify(s_err_text));
+                    //window.plugins.OneSignal.sendTag("key1", "value1");
+                    window.plugins.OneSignal.sendTag("email", login.toLowerCase());
+                    //window.plugins.OneSignal.getIds(function(ids) {
+                        //alert('2.getIds: ' + JSON.stringify(ids));
+                        //alert("2.userId = " + ids.userId + ", pushToken = " + ids.pushToken);
+                    //});
+
                     Authorize();
                 },
                 error: function(xhr, ajaxOptions, thrownError){
                     alert("please check the internet connection");
-                    alert(JSON.stringify(thrownError));
+                    alert(config.url.login +', line 849,'+JSON.stringify(thrownError));
+                    Logout();
                 },
                 complete: function(event,xhr,options) {
                     $(".overlay_progress").hide();
@@ -881,6 +926,7 @@ $("document").ready(function() {
                 document.location.href="#orderListPage";
             },
             error: function (result) {
+                alert('Error in reqs_list2');
             },
             complete: function(event,xhr,options) {
                 $(".overlay_progress").hide();
@@ -890,7 +936,6 @@ $("document").ready(function() {
     });
     $(document).on("click", "#notifyFilterSearchBtn", function(){
         $(".listData").html("");
-        //alert("notifyFilterSearchBtn");
         var date = $("#notifyDate").val();
         var status = parseInt($("#notifyStatus").val());
         var theme = $("#notifyTheme").val();
@@ -909,7 +954,6 @@ $("document").ready(function() {
             document.location.href="#notifyListPage";
         });
     });
-
     $(document).on("click", "ul.listData li", function(){
         var thisElem = this;
         $(".overlay_progress").show();
@@ -921,7 +965,6 @@ $("document").ready(function() {
             $("#notifyLookUpText").val($(thisElem).find(".notif_text_field").text());
 
             document.location.href="#notifyLookUpPage";
-            //alert($("#notifyLookUpId").val());
             $(".overlay_progress").hide();
             $.ajax({
                 url: config.url.insReq,
@@ -935,8 +978,7 @@ $("document").ready(function() {
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
                     response = null;
-                    alert("Error");
-                    //alert(JSON.stringify(thrownError));
+                    alert("Error in ins_req");
                     alert(JSON.stringify(xhr));
                 }
             });
@@ -944,7 +986,6 @@ $("document").ready(function() {
         }, 500);
         
     });
-    
     $(document).on("click", "ul.listOrderData li", function(){
         var thisElem = this;
         $(".overlay_progress").show();
@@ -958,7 +999,7 @@ $("document").ready(function() {
                 $("#orderAddressLookUp").val(data.req_address);
                 $("#orderUrgentLookUp").val(data.req_priority);
                 $("#orderLookUpText").val(data.req_note);
-                getImage(id, function(images){
+                getImage(id, 't_request', function(images){
                     $("#orderLookUpPhotoPage .content").html("");
                     for(var i = 0; i < images.length; i++)
                     {
@@ -966,38 +1007,14 @@ $("document").ready(function() {
                     }
                 });
             });
-
-            
-                   
-        }, 500);        
+        }, 500);
     });
-
     $(document).on("click", "ul.listAddrData li", function(){
         var thisElem = this;
-        //alert('listAddrData, '+ $(thisElem).find(".notif_id_field").text());
-        /*$(".overlay_progress").show();
-        setTimeout(function(){
-            document.location.href="#orderLookUpPage";
-            var id = parseInt($(thisElem).find(".id_field").text());
-            var data = getOrderByid(id)[0];
-            var images = getImage(id);
-            $("#orderLookUpPhotoPage .content").html("");
-            for(var i = 0; i < images.length; i++)
-            {
-                $("#orderLookUpPhotoPage .content").append("<img src=" + config.url.root + images[i].file_id + " class=\"gallery\" />");
-            }
-            $("#orderSubTypeLookUp").val(data.req_subtype);
-            $("#orderTypeLookUp").val(data.req_type);
-            $("#orderAddressLookUp").val(data.req_address);
-            $("#orderUrgentLookUp").val(data.req_priority);
-            $("#orderLookUpText").val(data.req_note);
-        }, 500);*/
     });
-
     $(document).on("click", "#orderPhotoShowBtn", function(){
         document.location.hash = "orderLookUpPhotoPage";
     });
-    
     $(document).on("click", "#reg_btn", function(){
         var dataToPost = {
             email: $('#reg_email').val(),
@@ -1072,13 +1089,13 @@ $("document").ready(function() {
                     document.location.href="#mainPage";
             },
             error: function (jqXHR, textStatus, errorThrown) {
+                alert('Error in line 1085');
             },
             complete: function(event,xhr,options) {
                 $(".overlay_progress").hide();
             }
         });
     });
-
     $(document).on("click", "#restore_btn", function(){
         var email = $("#restore_email").val();
         if(isValidEmailAddress(email))
@@ -1086,27 +1103,23 @@ $("document").ready(function() {
             $.post(config.url.restore_password + email,
             function (result) {
                 if (result.email == "email_not_found") {
-                    alert("messages.email_not_found");
+                    alert(getTranslate("email_not_found"));
                 }
                 else {
-                    alert("messages.resetPasswordMailSent" + result.email);
+                    alert(getTranslate("resetPasswordMailSent"));
                     document.location.href="#mainPage";
                 }                
             });
         }
         else
         {
-             alert("messages.invalidLogin");
+            alert(getTranslate("invalidLogin"));
         }
     });
-
     $(document).on("click", ".language", function(){
         updateLanguage();
     });
-
     $(document).on("click", ".attachFileBtn", function(){
-        //var file = document.querySelector('input[type=file]').files[0]
-        //getBase64(file);
         $(".overlay_progress").show();
         function uploadPhoto(fileName) {
             getFileContentAsBase64(fileName, function(base64Image, fileSize, fileShortName, fileType, fileModifiedTime){                        
@@ -1132,7 +1145,8 @@ $("document").ready(function() {
             uploadPhoto,
             function(message) {
                 alert('get picture failed');
-            }, 
+                $(".overlay_progress").hide();
+            },
             {
                 quality: 100,
                 destinationType: navigator.camera.DestinationType.FILE_URI,
@@ -1140,7 +1154,6 @@ $("document").ready(function() {
             }
         );
     });
-
     $(document).on("click", ".cameraBtn", function() {
         var options = {
             quality: 20,
@@ -1172,7 +1185,6 @@ $("document").ready(function() {
                     });
                 }, 
                 function(error){
-                    console.log(error);
                     $(".overlay_progress").hide();
                 }, 
                 options
@@ -1181,9 +1193,9 @@ $("document").ready(function() {
         catch(e)
         {
             alert(e.message);
+            $(".overlay_progress").hide();
         }
     });
-
     $(document).on("click", ".file-delete-button", function(){
         var index = $(this).parent().attr("index");
         var index2 = -1;
@@ -1198,7 +1210,6 @@ $("document").ready(function() {
         filesToSend.splice(index2, 1);
         $(this).parent().remove();
     });
-
     $(document).on("click", ".orderAddBtn", function(){
         var cur_btn=$(this);
         switch ($(cur_btn).attr('id')) {
@@ -1266,10 +1277,10 @@ $("document").ready(function() {
                             for (var i = 0; i < filesToSend.length; i++) {
                                 filesToSend[i].req_id = req_id;
                             }
-                            sendImageXHR();
+                            sendImageXHR(req_id, 't_request');
                         },
                         error: function () {
-                            alert("error occured while adding order");
+                            alert('Error in line 1282');
                         },
                         complete: function (event, xhr, options) {
                         }
@@ -1320,45 +1331,6 @@ $("document").ready(function() {
                 {
                     $("[for=\"feedText\"]").hide();
                 }
-                /*
-                 setTimeout(function () {
-                 var dataToPost = {
-                 req_subtype: parseInt($("#orderType").val()),
-                 req_flat: parseInt($("#orderAddress").val()),
-                 note: $("#orderText").val(),
-                 userId: 1,
-                 req_status: 1,
-                 dead_line: 'null',
-                 sqlpath: 'insert_cit_req',
-                 t_language_id: 1,
-                 userMail: 1
-                 };
-
-                 $.ajax({
-                 url: config.url.insReq,
-                 type: 'post',
-                 timeout: config.timeout,
-                 contentType: 'application/json;charset=UTF-8',
-                 async: false,
-                 data: JSON.stringify(dataToPost),
-                 beforeSend: function (xhr, opts) {
-                 $(".overlay_progress").show();
-                 },
-                 success: function (result) {
-                 var req_id = parseInt(result);
-                 for (var i = 0; i < filesToSend.length; i++) {
-                 filesToSend[i].req_id = req_id;
-                 }
-                 sendImageXHR();
-                 },
-                 error: function () {
-                 alert("error occured while adding order");
-                 },
-                 complete: function (event, xhr, options) {
-                 $(".overlay_progress").hide();
-                 }
-                 });
-                 }, 500);*/
                 if (validated!=true){
                     return validated;
                 }
@@ -1387,7 +1359,7 @@ $("document").ready(function() {
 
                         },
                         error: function () {
-                            alert("error occured while adding feed");
+                            alert('Error in line 1361');
                         },
                         complete: function (event, xhr, options) {
                             $(".overlay_progress").hide();
@@ -1490,7 +1462,7 @@ $("document").ready(function() {
                             
                         },
                         error: function (result) {
-                            alert(JSON.stringify(result));
+                            alert('Error in line 1464');
                         },
                         complete: function (event, xhr, options) {
                             $(".overlay_progress").hide();
@@ -1504,7 +1476,6 @@ $("document").ready(function() {
                 alert("Неизвестная кнопка");
         }
     });
-
     $(document).on("click", "#visiblePassword", function(){
         var elem = $("#passwordField");
         var type = elem.attr("type");
@@ -1518,7 +1489,6 @@ $("document").ready(function() {
             $(".visiblePassword").css("background", "url('img/visible.png') center center no-repeat");
         } 
     });
-
     $(document).on("click", ".savePasswordCls", function(){
         if(config.savePassword){
             $("#savePassword").prop("checked", false);
@@ -1530,13 +1500,11 @@ $("document").ready(function() {
             config.savePassword = true;
         }
     });
-
     $(document).on("click", "ul.overlay-menu-list li a", function() {
         $(".overlay").fadeOut("slow", function() {
             $("#contextMenuOpenBtn").show();
         });
     });
-
     $(document).on("keyup", "#passwordField", function(){
         if ($(this).val()) {
             $("#visiblePassword").addClass("visiblePassword-show");
@@ -1545,13 +1513,11 @@ $("document").ready(function() {
             $("#visiblePassword").removeClass("visiblePassword-show");
         }
     });
-
     $(document).on("change", "#languageList", function(){
         updateLanguage();
         $(".page").hide();
         $("#languagePage").show();
     });
-
     $(document).on("change", "#addrCity", function(){
         //$(".overlay_progress").show();
         var streetlist = getStreetList($("#addrCity").val());
@@ -1568,10 +1534,5 @@ $("document").ready(function() {
                 text : streetlist[i].text
             }));
         }
-        /*$("#addrStreet").addEventListener('touchstart', function(e) {
-            e.stopPropagation();
-        }, false);
-        $(".overlay_progress").hide();*/
     });
-
 });

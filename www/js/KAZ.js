@@ -1,5 +1,5 @@
 var KAZ = {
-    "login_header_text": "Жүйеге кіру, v.1.0.6",
+    "login_header_text": "TopKSK жүйесіне кіру",
     "login": "Логин",
     "password": "Құпия сөз",
     "login_btn_text": "Кіру",
@@ -13,7 +13,7 @@ var KAZ = {
     "registration": "Тіркелу",
     "send": "Жөнелту",
     "email": "Email",
-    "send_order": "Проблема жайлы хабарлау",
+    "send_order": "Өтініш жіберу",
     "not_readed": "Оқылмаған",
     "notif_status": "Статус",
     "readed": "Оқылған",
@@ -49,7 +49,7 @@ var KAZ = {
     "notify_list_header": "Хабарламалар",
     "language": "Тілді өзгерту",
     "order_photos": "Өтініш суреті",
-    "save_password": "Парольді сақтау",
+    "save_password": "Мені есте сақтау",
     "order_urgent": "Жеделдігі",
     "order_finish_time": "Орындалу мерзімі",
     "feed_text": "Хабарлама мәтіні",
@@ -67,5 +67,8 @@ var KAZ = {
     "citizen": "Тұрғыны",
     "addr_exists": "Сіздің тізімде бұл мекен-жай әлдеқашан қосылған",
     "ksknotfound": "Бұл мекенжайға қызмет көрсететін КСК әлі табылмады",
-    "auth_fail": "Логин немесе құпия сөз дұрыс емес"
+    "auth_fail": "Логин немесе құпия сөз дұрыс емес",
+    "email_not_found": "Өкінішке орай көрсетілген email бойынша пайдаланушы табылмады",
+    "resetPasswordMailSent": "Құпия сөзді қалпына келтіру нұсқаулықтары бар хат сіздің электрондық поштаңызға жіберілді",
+    "invalidLogin": "Қате логин"
 };

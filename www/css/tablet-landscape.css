@@ -245,18 +245,6 @@ a:hover{
 }
 
 
-
-/*.menuBtn{
-	position: fixed;
-	width: 40px;
-	top: 0;
-	left: 0;
-	height: 70px;
-	z-index: 1;
-	background: url('../img/bars.png') center center no-repeat;
-}*/
-
-
 .slideMenu {
   width:260px;
   height:100%;
