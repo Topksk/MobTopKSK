@@ -39,7 +39,7 @@ var app = {
         //});
 
         var notificationOpenedCallback = function(jsonData) {
-            console.log('notificationOpenedCallback: ' + JSON.stringify(jsonData));
+            //console.log('notificationOpenedCallback: ' + JSON.stringify(jsonData));
         };
 
         window.plugins.OneSignal
@@ -48,6 +48,24 @@ var app = {
             .endInit();
 
         app.receivedEvent('deviceready');
+
+        /*var vInfo =  'Device Name: ' + device.name + '\n' +
+            'Device Cordova: ' + device.cordova + '\n' +
+            'Device Platform: ' + device.platform + '\n' +
+            'Device UUID: ' + device.uuid + '\n' +
+            'Device Version: '+ device.version;
+        alert(vInfo);*/
+
+        /*try{
+         alertObject(navigator);
+         navigator.notification.alert("Comprueba si has rellenado todos los campos.", null, "Información");
+         navigator.notification.alert("Unable to connect to server !");
+         }
+         catch(e)
+         {
+         alert(e.message);
+         }*/
+
 
     },
     // Update DOM on a Received Event

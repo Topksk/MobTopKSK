@@ -12,7 +12,7 @@
 	$.mask = {
 		//Predefined character definitions
 		definitions: {
-			'9': "[0-9]",
+			'`': "[0-9]",
 			'a': "[A-Za-z]",
 			'b': "[- А-Яа-яA-Za-z]",
 			'e': "[- @ . _ - + \ / # % ( ) ? * ! $ А-Яа-яA-Za-z0-9]",

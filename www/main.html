@@ -1,0 +1,389 @@
+<!doctype html>
+<html>
+	<head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta http-equiv="Content-Security-Policy" content="default-src * 'self' data: gap:  https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; media-src *">
+		<link rel="stylesheet" href="css/phone-portrait.css" media="only screen and (min-width: 320px)" />
+		<!--<link rel="stylesheet" href="css/phone-landscape.css" media="only screen and (min-width: 480px)" />
+		<link rel="stylesheet" href="css/tablet-portrait.css" media="only screen and (min-width: 600px)" />
+		<link rel="stylesheet" href="css/tablet-landscape.css" media="only screen and (min-width: 801px)" />
+		<link rel="stylesheet" href="css/ultra-device.css" media="only screen and (min-width: 1025px)" />-->
+		<link rel="stylesheet" href="css/main.css" media="screen" />
+		<link rel="stylesheet" href="css/select2.css" rel="stylesheet"/>
+		<script type="text/javascript" charset="utf-8" src="js/jquery.min.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/hammer.min.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/jquery.hammer.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/config.js"></script>
+		<script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+		<script type="text/javascript" charset="utf-8" src="index.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/KAZ.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/RUS.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/tmpl.min.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/main.js"></script>	
+		<script type="text/javascript" src="js/menu.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/moment.min.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/jquery_maskedinput_122.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/select2.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			$(document).ready(function() {
+				$(".select2-searchable").select2();
+			});
+		</script>
+	</head>
+	<body>
+		<div class="slideMenu">
+			<ul class="menuList">
+				<li class="header" id="firstName"></li>
+				<li link="notifyListPage">{%=o.notify_list_header%}</li>
+				<li link="orderListPage">{%=o.order_list_header%}</li>
+				<li link="addrListPage">{%=o.address_list%}</li>
+				<li link="languagePage">{%=o.language%}</li>
+				<li link="exit">{%=o.exit%}</li>
+			</ul>
+		</div>
+
+		<div class="page" id="mainPage">
+				<div class="header">
+					<span class = "header_text" id="label_header">Войти в систему</span>
+					<span class = "language">&nbsp;</span>
+				</div>
+
+				<div class="content">
+					<div class="form">
+						<label for="loginField" class="warning" id="label_login">{%=o.not_filled%}</label>
+						<input type="text" placeholder="Логин" id="loginField" name="loginField"/>
+						<label for="passwordField" class="warning" id="label_pass">{%=o.not_filled%}</label>
+						<div class="text-container">
+							<input type="password" placeholder="Пароль" id="passwordField" />
+							<span id="visiblePassword" class="visiblePassword"></span>
+						</div>
+							<div class="savePasswordCls">
+								<input type="checkbox" id="savePassword" /><a id="lsavePassword">&nbsp;Сохранить пароль</a>
+							</div>
+						<input type="button" value="Войти" id="loginBtn"/>
+						<a class="small" href="#forgotPassword" id="lforgotPassword">Восстановить пароль?</a>
+						<a class="small" href="#registration" id="lregistration">Регистрация</a>
+					</div>
+				</div>
+
+			</div>
+
+		<div class="page" id="forgotPassword">
+			<div class="header">
+				<a class = "backBtn" href="#mainPage"></a>
+				<span class = "header_text">{%=o.restore_password_header_text%}</span>
+			</div>
+			<div class="content">
+				<div class="form">
+					<input type="text" placeholder="{%=o.email%}" id="restore_email" />
+					<input type="button" value="{%=o.send%}" id="restore_btn" />
+				</div>
+			</div>
+		</div>
+
+		<div class="page" id="languagePage" >
+			<div class="header">
+				<span class = "menuBtn"></span>
+				<span class = "header_text">{%=o.language%}</span>
+			</div>
+			<div class="content">
+				<div class="form">
+					<select class="listofitem" id="languageList">
+						<option value="KAZ">KAZ</option>
+						<option value="RUS">RUS</option>
+					</select>
+				</div>
+			</div>
+		</div>
+
+		<div class="page" id="registration">
+			<div class="header">
+				<a class = "backBtn" href="#mainPage"> </a>
+				<span class = "header_text">{%=o.registration_header_text%}</span>
+			</div>
+			<div class="content">
+				<div class="form">
+					<label for="reg_email" class="warning">{%=o.not_filled%}</label>
+					<input type="text"  placeholder="{%=o.email%}" id="reg_email" name="reg_email"/>
+					<label for="reg_password" class="warning">{%=o.not_filled%}</label>
+					<input type="password" placeholder="{%=o.password%}" id="reg_password" name="reg_password" />
+					<label for="reg_firstname" class="warning">{%=o.not_filled%}</label>
+					<input type="text"  placeholder="{%=o.firstName%}" id="reg_firstname" name="reg_firstname" />
+					<label for="reg_lastname" class="warning">{%=o.not_filled%}</label>
+					<input type="text"  placeholder="{%=o.lastName%}" id="reg_lastname" name="reg_lastname" />
+					<label for="reg_phone" class="warning">{%=o.not_filled%}</label>
+					<input type="text"  placeholder="{%=o.phone%}" id="reg_phone" name="reg_phone" />
+					<input type="button" value="{%=o.registration%}" id="reg_btn" name="reg_btn" />
+				</div>
+			</div>
+		</div>
+
+		<div class="page" id="notifyFilterPage">
+			<div class="header">
+				<a class = "backBtn" href="#notifyListPage"> </a>
+				<span class = "header_text">{%=o.notify_filter_header%}</span>
+			</div>
+            
+			<div class="content">
+				<div class="form">
+					<label>{%=o.notify_number%}</label>
+					<input type="text" id="notifyId" />
+					<label>{%=o.notify_theme%}</label>
+					<input type="text" id="notifyTheme" />
+					<label>{%=o.order_status%}</label>
+					<select id="notifyStatus">
+						<option value="0">{%=o.all%}</option>
+						<option value="1">{%=o.not_readed%}</option>
+						<option value="2">{%=o.readed%}</option>
+						<option value="3">{%=o.sended%}</option>
+					</select>
+					<!--select class="listofitem" id="notifyStatus">
+						<option></option>
+					</select-->
+					<label>{%=o.notify_data%}</label>
+					<input type="date" id="notifyDate" />
+					<input type="button" value="{%=o.search%}" id="notifyFilterSearchBtn" />
+				</div>
+			</div>            
+		</div>
+
+		<div class="page" id="notifyLookUpPage">
+			<div class="header">
+				<a class = "backBtn" href="#notifyListPage"> </a>
+				<span class = "header_text">{%=o.notify_lookup_header%}</span>
+			</div>
+            
+			<div class="content">
+				<div class="form">
+					<label>{%=o.notify_number%}</label>
+					<input type="text" placeholder="" id="notifyLookUpId" />
+					<label>{%=o.notify_datetime%}</label>
+					<input type="text" placeholder="" id="notifyLookUpDate" />
+					<label>{%=o.sender_fio%}</label>
+					<input type="text" placeholder="" id="notifyLookUpFioSender" />
+					<label>{%=o.notify_theme%}</label>
+					<input type="text" placeholder="" id="notifyLookUpTheme" />
+					<label>{%=o.notify_text%}</label>
+					<textarea id="notifyLookUpText"></textarea>
+				</div>
+			</div>
+            
+		</div>
+
+		<div class="page" id="notifyListPage">
+			<div class="header">
+				<span class = "menuBtn"> </span>
+				<span class = "header_text">{%=o.notify_list_header%}</span>
+				<a class = "search" href="#notifyFilterPage"></a>
+			</div>            
+			<div class="content">
+				<ul class="listData">
+				</ul>
+			</div>
+		</div>
+
+		<div class="page" id="orderAddPage">
+			<div class="header">
+				<a class = "backBtn" href="#orderListPage"> </a>
+				<span class = "header_text">{%=o.order_add_header%}</span>
+				<span class = "orderAddBtn" id="orderAddBtn"> </span>
+			</div>            
+			<div class="content">
+				<div class="form">
+					<label for="orderType" class="warning">{%=o.not_filled%}</label>
+					<select class="listofitem" id="orderType">
+						<option>{%=o.order_type%}</option>
+					</select>
+					<label for="orderAddress" class="warning">{%=o.not_filled%}</label>
+					<select class="listofitem" id="orderAddress">
+						<option>{%=o.order_address%}</option>
+					</select>
+					<label for="orderText" class="warning">{%=o.not_filled%}</label>
+					<textarea id="orderText" placeholder="{%=o.order_text%}"></textarea>
+					<div class="cameraButtons">						
+						<span class="attachFileBtn"></span>
+						<!--<input type="button" id="imageUploadBtn" />-->
+						<span class="cameraBtn"></span>
+					</div>					
+					<!--<input type="button" value="{%=o.send%}" id="orderSendBtn" />-->
+				</div>
+			</div>           
+		</div>
+
+		<div class="page" id="orderFilterPage">
+			<div class="header">
+				<a class = "backBtn" href="#orderListPage"> </a>
+				<span class = "header_text">{%=o.order_filter_header%}</span>
+			</div>
+            
+			<div class="content">
+				<div class="form">
+					<input type="text" placeholder="{%=o.orderId%}" id="orderId" name="orderId"/>
+					<select class="listofitem" id="orderFilterType">
+						<option>{%=o.order_type%}</option>
+					</select>
+					<select class="listofitem" id="orderFilterAddress">
+						<option>{%=o.order_address%}</option>
+					</select>
+					<select class="listofitem" id="orderFilterStatus">
+						<option>{%=o.order_status%}</option>
+					</select>
+					<select class="listofitem" id="orderReqSubType">
+						<option>{%=o.order_sub_reqtype%}</option>
+					</select>
+					<input type="date" placeholder="{%=o.order_date_from%}" id="orderDateFrom" />
+					<input type="date" placeholder="{%=o.order_date_to%}" id="orderDateTo" />
+					<input type="button" value="{%=o.send%}" id="orderFilterBtn" />
+				</div>
+			</div>            
+		</div>
+
+		<!-- Список заявок -->
+		<div class="page" id="orderListPage">
+			<div class="header">
+				<span class = "menuBtn"></span>
+				<span class = "header_text">{%=o.order_list_header%}</span>
+				<a href="#orderFilterPage" class="search"></a>
+			</div>
+            
+			<div class="content">
+				<ul class="listOrderData">
+				</ul>
+			</div>
+		</div>
+		
+		<!-- Просмотр заявки -->
+		<div class="page" id="orderLookUpPage">
+			<div class="header">
+				<a class = "backBtn" href="#orderListPage"></a>
+				<span class = "header_text">{%=o.order_lookup_header%}</span>
+			</div>
+			<div class="content">
+				<div class="form">
+					<label for="orderIdLookUp">{%=o.orderId%}</label>
+					<input type="text" placeholder="" id="orderIdLookUp" name="orderIdLookUp" readonly />
+					<label for="orderSubTypeLookUp">{%=o.order_sub_reqtype%}</label>
+					<input type="text" placeholder="" id="orderSubTypeLookUp" name="orderSubTypeLookUp" readonly />
+					<label for="orderTypeLookUp">{%=o.order_type%}</label>
+					<input type="text" placeholder="" id="orderTypeLookUp" name="orderTypeLookUp" readonly />
+					<label for="orderAddressLookUp">{%=o.order_address%}</label>
+					<input type="text" placeholder="" id="orderAddressLookUp" name="orderAddressLookUp" readonly />
+					<label for="orderUrgentLookUp">{%=o.order_urgent%}</label>
+					<input type="text" placeholder="" id="orderUrgentLookUp" name="orderUrgentLookUp" readonly />
+					<label for="orderFinishTimeLookUp">{%=o.order_finish_time%}</label>
+					<input type="text" placeholder="" id="orderFinishTimeLookUp" name="orderFinishTimeLookUp" readonly />
+					<label for="orderLookUpText">{%=o.order_text%}</label>
+					<textarea id="orderLookUpText" readonly></textarea>
+					<input type="button" value="{%=o.order_photos%}" id="orderPhotoShowBtn" name="orderPhotoShowBtn" />
+				</div>
+			</div>            
+		</div>
+
+		<div class="page" id="orderLookUpPhotoPage">
+			<div class="header">
+				<a class = "backBtn" href="#orderLookUpPage"></a>
+				<span class = "header_text">{%=o.order_photos%}</span>
+			</div>
+			<div class="content"></div>
+		</div>
+
+		<div class="page" id="feedbackAddPage">
+			<div class="header">
+				<a class = "backBtn" href="#orderListPage"> </a>
+				<span class = "header_text">{%=o.send_feedback%}</span>
+				<span class = "orderAddBtn" id="feedAddBtn"> </span>
+			</div>
+			<div class="content">
+				<div class="form">
+					<label for="feedbackfio">{%=o.firstName%}, {%=o.lastName%}</label>
+					<label for="feedbackfio" class="warning">{%=o.not_filled%}</label>
+					<input type="text" id="feedbackfio" name="feedbackfio"/>
+					<label for="feedbackphone">{%=o.phone%}</label>
+					<label for="feedbackphone" class="warning">{%=o.not_filled%}</label>
+					<input type="text" id="feedbackphone" name="feedbackphone"/>
+					<label for="feedbackemail">{%=o.email%}</label>
+					<label for="feedbackemail" class="warning">{%=o.not_filled%}</label>
+					<input type="text" id="feedbackemail" name="feedbackemail"/>
+					<label for="feedText">{%=o.feed_text%}</label>
+					<label for="feedText" class="warning">{%=o.not_filled%}</label>
+					<textarea id="feedText"></textarea>
+				</div>
+			</div>
+		</div>
+
+		<div class="page" id="addrListPage">
+			<div class="header">
+				<span class = "menuBtn"></span>
+				<span class = "header_text">{%=o.address_list%}</span>
+			</div>
+			<div class="content">
+				<ul class="listAddrData">
+				</ul>
+			</div>
+		</div>
+
+		<div class="page" id="addrAddPage">
+			<div class="header">
+				<a class = "backBtn" href="#addrListPage"> </a>
+				<span class = "header_text">{%=o.addr_add%}</span>
+				<span class = "orderAddBtn" id="addrAddBtn"></span>
+			</div>
+			<div class="content">
+				<div class="form">
+					<label for="addrCity">{%=o.city%}</label>
+					<label for="addrCity" class="warning">{%=o.not_filled%}</label>
+					<select class="listofitem" id="addrCity"></select>
+					<label for="addrStreet">{%=o.street%}</label>
+					<label for="addrStreet" class="warning">{%=o.not_filled%}</label>
+					<select id="addrStreet" class="select2-searchable">
+						<!--select id="addrStreet" class="listofitem"-->
+					</select>
+					<label for="addrBuild">{%=o.building%}</label>
+					<label for="addrBuild" class="warning">{%=o.not_filled%}</label>
+					<input type="text" id="addrBuild"/>
+					<label for="addrBuildSub">{%=o.drob_corp%}</label>
+					<label for="addrBuildSub" class="warning">{%=o.not_filled%}</label>
+					<input type="text" id="addrBuildSub"/>
+					<label for="addrFlat">{%=o.flat%}</label>
+					<label for="addrFlat" class="warning">{%=o.not_filled%}</label>
+					<input type="text" id="addrFlat"/>
+					<label for="addrFlatSub">{%=o.drob%}</label>
+					<label for="addrFlatSub" class="warning">{%=o.not_filled%}</label>
+					<input type="text" id="addrFlatSub"/>
+					<label >{%=o.relation%}</label>
+					<label id="errAddrRel" class="warning">{%=o.not_filled%}</label>
+					<div>
+						<input name="addrRelation" type="radio" value="2">{%=o.owner%}
+					</div>
+					<div>
+						<input name="addrRelation" type="radio" value="1">{%=o.citizen%}
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+		<div class="round-button-open" id="contextMenuOpenBtn"></div>
+		<div class="overlay">
+			<ul class="overlay-menu-list">
+				<li><a href="#orderAddPage">{%=o.send_order%}</a></li>
+				<li><a href="#feedbackAddPage">{%=o.send_feedback%}</a></li>
+				<li><a href="#addrAddPage">{%=o.addr_add%}</a></li>
+				<li><div class="round-button-close" id="contextMenuOpenClose"></div></li>
+			</ul>
+		</div>
+		<div class="overlay_progress">
+			<div id="circleG">
+				<div id="circleG_1" class="circleG"></div>
+				<div id="circleG_2" class="circleG"></div>
+				<div id="circleG_3" class="circleG"></div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			app.initialize();
+			setLanguage();
+		</script>		
+	</body>
+	
+</html>

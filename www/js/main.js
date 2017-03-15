@@ -3,12 +3,25 @@ var body_copy;
 var langData;
 var filesToSend = [];
 var oClientData={};
+var n_cp=0;
 
-Date.prototype.toDateInputValue = (function() {
+    Date.prototype.toDateInputValue = (function() {
     var local = new Date(this);
     local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
     return local.toJSON().slice(0,10);
 });
+
+function PhoneGapAlert() {
+    // Function called when alert get dismissed
+}
+
+function alertObject(obj) {
+    var str = "";
+    for (k in obj) {
+        str += k + ": " + obj[k] + "\r\n";
+    }
+    alert(str);
+}
 
 function getTranslate(pattern)
 {
@@ -28,7 +41,6 @@ function getClientData(callback) {
             },
             error: function(xhr, ajaxOptions, thrownError){
                 alert('getClientData, thrownError33='+JSON.stringify(thrownError));
-                alert(JSON.stringify(localStorage));
             }
         });
     }
@@ -48,10 +60,9 @@ function Login(login, password, callback)
             $(".overlay_progress").show();
         },
         success: function(data){
-            //alert('2.login='+login+', to OneSignal');
             //window.plugins.OneSignal.syncHashedEmail(login);
-            //window.plugins.OneSignal.sendTag("key2", "value2");
             window.plugins.OneSignal.sendTag("email", login.toLowerCase());
+            //window.plugins.OneSignal.deleteTag("key1");
             //window.plugins.OneSignal.getIds(function(ids) {
                 //alert('1.getIds: ' + JSON.stringify(ids));
                 //alert("userId = " + ids.userId + ", pushToken = " + ids.pushToken);
@@ -120,6 +131,7 @@ function setLanguage()
 
     $("#lforgotPassword").text(getTranslate("restore_password_link"));
     $("#lregistration").text(getTranslate("registration_link"));
+    $('#reg_phone').mask(getTranslate("phonemask"));
     var hash = window.location.hash;
     hash = hash.substring(1, hash.length);
     if(config.availableContextMenu.indexOf(hash) != -1)
@@ -244,31 +256,43 @@ function Authorize()
         timeout: config.timeout,
         cache: false,
         success: function(data){
-            if(!config.savePassword) {
-                $("#loginField").val(null);
-                $("#passwordField").val(null);
-                localStorage.removeItem("login");
-                localStorage.removeItem("password");
-                localStorage.removeItem("savePassword");
+            try {
+                n_cp=260;
+                if(!config.savePassword) {
+                    $("#loginField").val(null);
+                    $("#passwordField").val(null);
+                    localStorage.removeItem("login");
+                    localStorage.removeItem("password");
+                    localStorage.removeItem("savePassword");
+                }
+                else
+                {
+                    localStorage.setItem("login", $("#loginField").val());
+                    localStorage.setItem("password", $("#passwordField").val());
+                    localStorage.setItem("savePassword", true);
+                }
+                n_cp=274;
+                $("#firstName").text(data.user_info.first_name);
+                n_cp=276;
+                localStorage.setItem("authorized", "true");
+                n_cp=278;
+                $(this).attr("type", "password");
+                n_cp=280;
+                $("#visiblePassword").removeClass("visiblePassword-show");
+                n_cp=282;
+                localStorage.setItem("userFirstName", data.user_info.first_name);
+                n_cp=284;
+                document.location.hash = "notifyListPage";
+                n_cp=286;
+                DrawNotifyList();
+                n_cp=288;
             }
-            else
-            {
-                localStorage.setItem("login", $("#loginField").val());
-                localStorage.setItem("password", $("#passwordField").val());
-                localStorage.setItem("savePassword", true);
+            catch (e) {
+                alert('Line ' + n_cp + ',' + e.message+ ', data.user_info='+data.user_info);
             }
-            $("#firstName").text(data.user_info.first_name);
-            //window.plugins.PushbotsPlugin.updateAlias(data.user_info.recid);
-            localStorage.setItem("authorized", "true");
-            $(this).attr("type", "password");
-            $("#visiblePassword").removeClass("visiblePassword-show");
-            localStorage.setItem("userFirstName", data.user_info.first_name);
-            document.location.hash = "notifyListPage";
-            DrawNotifyList();
         },
         error: function(xhr, ajaxOptions, thrownError){
             alert(getTranslate("auth_fail"));
-            //alert("thrownError="+JSON.stringify(thrownError));
         }
     });
 }
@@ -332,7 +356,6 @@ function DrawNotifyList()
             }
         }
     });
-    
 }
 
 function getCityList()
@@ -416,7 +439,6 @@ $("document").ready(function()
         $(this).hide();
         $(".overlay").fadeIn("slow");
     });
-
     $(document).on("click", "#contextMenuOpenClose",  function() {
         $(".overlay").fadeOut("slow", function() {
             $("#contextMenuOpenBtn").show();
@@ -477,7 +499,6 @@ $("document").ready(function()
 
         $(".page").hide();
         $("#"+hash).css("display", "block");
-
         if(hash == "orderAddPage")
         {
             $("#orderType option").not(':first').remove();
@@ -509,7 +530,7 @@ $("document").ready(function()
             var langId = config.lang();
             var today = new Date();
             var yesterday = new Date(today);
-            yesterday.setMonth(today.getMonth() - 1);
+            yesterday.setMonth(today.getMonth() - 12);
             var dataToPost = {
                 citreqs: 1,            
                 dat_reg_beg: yesterday.toJSON().slice(0, 10),
@@ -545,9 +566,7 @@ $("document").ready(function()
                                 response[i].req_status + "</div><div class=\"date_field\">" + moment(response[i].dat_reg.substring(0, 19), 'YYYY-MM-DDTHH:mm:ss').format('DD.MM.YYYY HH:mm:ss') +
                                 "</div><div class=\"clear\"></div></li>");
                         }
-                            //new Date(response[i].dat_reg).toLocaleString('ru-RU')
                     }
-
                     document.location.href="#orderListPage";
                 },
                 error: function (result) {
@@ -608,8 +627,12 @@ $("document").ready(function()
         }
         else if(hash == "orderFilterPage")
         {
-            $('#orderDateFrom').val(new Date().toDateInputValue());
-            $('#orderDateTo').val(new Date().toDateInputValue());
+            var today = new Date();
+            var yesterday = new Date(today);
+            yesterday.setMonth(today.getMonth() - 12);
+
+            $('#orderDateFrom').val(yesterday.toDateInputValue());
+            $('#orderDateTo').val(today.toDateInputValue());
             
             $("#orderFilterType option").not(':first').remove();
             $("#orderFilterAddress option").not(':first').remove();
@@ -837,6 +860,28 @@ $("document").ready(function()
 
         if(validated)
         {
+            var dataToPost = {
+                code: '1',
+                sdescription: login,
+                code2: '1',
+                sdescription2: login,
+                sqlpath: 'req_after_auth'
+            };
+
+            $.ajax({
+                url: config.url.insReq,
+                type: 'post',
+                async: false,
+                contentType: 'application/json;charset=UTF-8',
+                data: JSON.stringify(dataToPost),
+                success: function (result) {
+                    // one_times_code;
+                },
+                error: function(xhr, ajaxOptions, thrownError){
+                    alert(config.url.login +', line 876,'+JSON.stringify(thrownError));
+                }
+            });
+
             $.ajax({
                 url: config.url.login,
                 data: "role="+login+"&password="+password+"&authurl=login.html",
@@ -849,18 +894,7 @@ $("document").ready(function()
                     $(".overlay_progress").show();
                 },
                 success: function(data){
-                    //alert('1.login='+login+', to OneSignal');
-                    //window.plugins.OneSignal.syncHashedEmail(login);
-                    //s_err_text = window.plugins.OneSignal.syncHashedEmail(login);
-                    //alert(s_err_text);
-                    //alert(JSON.stringify(s_err_text));
-                    //window.plugins.OneSignal.sendTag("key1", "value1");
                     window.plugins.OneSignal.sendTag("email", login.toLowerCase());
-                    //window.plugins.OneSignal.getIds(function(ids) {
-                        //alert('2.getIds: ' + JSON.stringify(ids));
-                        //alert("2.userId = " + ids.userId + ", pushToken = " + ids.pushToken);
-                    //});
-
                     Authorize();
                 },
                 error: function(xhr, ajaxOptions, thrownError){
@@ -873,8 +907,6 @@ $("document").ready(function()
                 }
             });            
         }
-        
-
     });
     $(document).on("click", "#orderFilterBtn", function(){
         var langId = config.lang();
@@ -932,7 +964,6 @@ $("document").ready(function()
                 $(".overlay_progress").hide();
             }
         });
-
     });
     $(document).on("click", "#notifyFilterSearchBtn", function(){
         $(".listData").html("");
@@ -956,6 +987,11 @@ $("document").ready(function()
     });
     $(document).on("click", "ul.listData li", function(){
         var thisElem = this;
+        if (config.pbtn==1) {
+            config.pbtn=0;
+            DrawNotifyList();
+            return;
+        }
         $(".overlay_progress").show();
         setTimeout(function(){
             $("#notifyLookUpId").val($(thisElem).find(".id_field").text());
@@ -978,8 +1014,7 @@ $("document").ready(function()
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
                     response = null;
-                    alert("Error in ins_req");
-                    alert(JSON.stringify(xhr));
+                    alert("Error in line 1002: "+JSON.stringify(xhr));
                 }
             });
             DrawNotifyList();
@@ -987,6 +1022,10 @@ $("document").ready(function()
         
     });
     $(document).on("click", "ul.listOrderData li", function(){
+        if (config.pbtn==1) {
+            config.pbtn=0;
+            return;
+        }
         var thisElem = this;
         $(".overlay_progress").show();
         setTimeout(function(){
@@ -994,6 +1033,7 @@ $("document").ready(function()
             var id = parseInt($(thisElem).find(".id_field").text());
 
             getOrderByid(id, function(data){
+                $("#orderIdLookUp").val(data.recid);
                 $("#orderSubTypeLookUp").val(data.req_subtype);
                 $("#orderTypeLookUp").val(data.req_type);
                 $("#orderAddressLookUp").val(data.req_address);
@@ -1086,10 +1126,11 @@ $("document").ready(function()
                 $(".overlay_progress").show();
             },
             success: function (result) {                    
-                    document.location.href="#mainPage";
+                document.location.href="#mainPage";
+                alert(getTranslate("userSuccReg"));
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                alert('Error in line 1085');
+                alert('Error in line 1085:' + JSON.stringify(xhr));
             },
             complete: function(event,xhr,options) {
                 $(".overlay_progress").hide();

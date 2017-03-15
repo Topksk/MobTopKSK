@@ -1,6 +1,7 @@
 var rhost="https://topksk.kz/";
 var config = {
     timeout: 90000,
+    pbtn: 0,
     url : {
         root: rhost,
         current : rhost + "supplierProfile/employees/current",
