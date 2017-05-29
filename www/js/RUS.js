@@ -48,7 +48,7 @@ var RUS = {
     "search": "Поиск",
     "notify_list_header": "Уведомления",
     "language": "Поменять язык",
-    "order_photos": "Фото заявления",
+    "order_photos": "Фото заявки",
     "save_password": "Запомнить меня",
     "order_urgent": "Срочность",
     "order_finish_time": "Срок исполнения",

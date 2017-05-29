@@ -3,15 +3,12 @@ function openAndCloseMenu(){
     {
         $(".page").animate({"left": "250px"});
         $("div.header").animate({"left": "250px"});
-        //$(".slideMenu").show();
-        //alert("z-index, slideMenu=" + $(".slideMenu").css("z-index") + ", page=" + $(".page").css("z-index"));
     }
     else
     {
         $(".page").animate({"left": "0px"});
         $("div.header").animate({"left": "0px"});
         config.pbtn=1;
-        //$(".slideMenu").hide();
     }
 }
 

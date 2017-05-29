@@ -5,15 +5,11 @@ var filesToSend = [];
 var oClientData={};
 var n_cp=0;
 
-    Date.prototype.toDateInputValue = (function() {
+Date.prototype.toDateInputValue = (function() {
     var local = new Date(this);
     local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
     return local.toJSON().slice(0,10);
 });
-
-function PhoneGapAlert() {
-    // Function called when alert get dismissed
-}
 
 function alertObject(obj) {
     var str = "";
@@ -23,8 +19,7 @@ function alertObject(obj) {
     alert(str);
 }
 
-function getTranslate(pattern)
-{
+function getTranslate(pattern) {
     return (config.lang() == "1") ? RUS[pattern] : KAZ[pattern];
 }
 
@@ -40,14 +35,13 @@ function getClientData(callback) {
                 callback();
             },
             error: function(xhr, ajaxOptions, thrownError){
-                alert('getClientData, thrownError33='+JSON.stringify(thrownError));
+                alert('getClientData, thrownError39='+JSON.stringify(thrownError));
             }
         });
     }
 }
 
-function Login(login, password, callback)
-{
+function Login(login, password, callback) {
     $.ajax({
         url: config.url.login,
         data: "role="+login+"&password="+password+"&authurl=login.html",
@@ -68,10 +62,12 @@ function Login(login, password, callback)
                 //alert("userId = " + ids.userId + ", pushToken = " + ids.pushToken);
             //});
             callback();
+            //alert('login success, authorized='+localStorage.getItem("authorized"));
+            //localStorage.setItem("authorized", "true")
         },
         error: function(xhr, ajaxOptions, thrownError){
             alert("please check the internet connection");
-            alert(config.url.login +', line 58,'+JSON.stringify(thrownError));
+            alert(config.url.login +', line 70,'+JSON.stringify(thrownError));
             Logout();
         },
         complete: function(event,xhr,options) {
@@ -80,8 +76,7 @@ function Login(login, password, callback)
     });
 }
 
-function Logout()
-{
+function Logout() {
     $.ajax({
         url: config.url.logout,
         type: 'POST',
@@ -99,8 +94,7 @@ function Logout()
     });
 }
 
-function setLanguage()
-{
+function setLanguage() {
     if(!config.savePassword) {
         $("#loginField").val(null);
         $("#passwordField").val(null);
@@ -145,13 +139,12 @@ function setLanguage()
 
 }
 
-function getOrderReqType(callback)
-{
+function getOrderReqType(callback) {
     var langId = config.lang();
 
     var dataToPost = {
         lang_id: langId,
-        name: "req_type"
+        name: "req_type_ksk"
     };
 
     var response = [];
@@ -177,8 +170,7 @@ function getOrderReqType(callback)
     });
 }
 
-function getStatuses(callback)
-{
+function getStatuses(callback) {
     var langId = config.lang();
 
     var dataToPost = {
@@ -212,8 +204,7 @@ function getStatuses(callback)
     return response;
 }
 
-function getUserAddress(callback)
-{
+function getUserAddress(callback) {
     var langId = config.lang();
 
     var response = [];
@@ -246,8 +237,7 @@ function getUserAddress(callback)
     });   
 }
 
-function Authorize()
-{
+function Authorize() {
     $.ajax({
         url: config.url.current,
         contentType: 'application/x-www-form-urlencoded',
@@ -257,7 +247,7 @@ function Authorize()
         cache: false,
         success: function(data){
             try {
-                n_cp=260;
+                n_cp=248;
                 if(!config.savePassword) {
                     $("#loginField").val(null);
                     $("#passwordField").val(null);
@@ -271,21 +261,21 @@ function Authorize()
                     localStorage.setItem("password", $("#passwordField").val());
                     localStorage.setItem("savePassword", true);
                 }
-                n_cp=274;
+                n_cp++;
                 $("#firstName").text(data.user_info.first_name);
-                n_cp=276;
+                n_cp++;
                 localStorage.setItem("authorized", "true");
-                n_cp=278;
+                n_cp++;
                 $(this).attr("type", "password");
-                n_cp=280;
+                n_cp++;
                 $("#visiblePassword").removeClass("visiblePassword-show");
-                n_cp=282;
+                n_cp++;
                 localStorage.setItem("userFirstName", data.user_info.first_name);
-                n_cp=284;
+                n_cp++;
                 document.location.hash = "notifyListPage";
-                n_cp=286;
+                n_cp++;
                 DrawNotifyList();
-                n_cp=288;
+                n_cp++;
             }
             catch (e) {
                 alert('Line ' + n_cp + ',' + e.message+ ', data.user_info='+data.user_info);
@@ -297,25 +287,25 @@ function Authorize()
     });
 }
 
-function GetList(date, status, theme, notifid, callback)
-{
-    var response = {};
+function DrawNotifyList() {
+    $(".listData").html("");
+    var ddate = $("#notifyDate").val();
+    var status = parseInt($("#notifyStatus").val());
+    var theme = $("#notifyTheme").val();
+    var nid = ($("#notifyId").val() == "") ? -1 : parseInt($("#notifyId").val());
     var langId = config.lang();
 
-    if(date == "")
-    {
-        date = "1111-11-11";
-    }
+    if(ddate == "") {ddate = "1111-11-11";}
 
     var dataToPost = {  t_language_id: langId,
-                        userId: 1,
-                        notifid: notifid,
-                        notifDate1: date,
-                        status: status,
-                        theme1: theme,
-                        sqlpath: 'sprav/get_notification'
-                    };
-
+        userId: 1,
+        notifid: nid,
+        notifDate1: ddate,
+        status: status,
+        theme1: theme,
+        sqlpath: 'sprav/get_notification'
+    };
+    //alert('GetList.dataToPost='+JSON.stringify(dataToPost));
     $.ajax({url: config.url.spr_oth,
         type: 'post',
         contentType: 'application/json;charset=UTF-8',
@@ -324,42 +314,36 @@ function GetList(date, status, theme, notifid, callback)
         beforeSend : function(xhr, opts){
             $(".overlay_progress").show();
         },
-        success: function (data, textStatus, request) {
-            response = data;
-            callback(response);
+        success: function (result, textStatus, request) {
+            response = result;
+            //alert('GetList.success, response='+JSON.stringify(response));
+            //callback(response);
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            response = null;
             alert('Error in get_notif');
         },
-        complete: function(event,xhr,options) {
+        complete: function(event, xhr, options) {
             $(".overlay_progress").hide();
-        }
-    });
-    
-    return response;
-}
+            //alert('GetList.complete, response='+JSON.stringify(response));
+            //callback(response);
 
-function DrawNotifyList()
-{
-    $(".listData").html("");
-    var response = GetList("1111-11-11", 0, "", -1, function(response){
-        if(response != null)
-        {
-            var date2 ="";
-            for(var i = 0; i < response.length; i++)
+            if(response != null)
             {
-                $(".listData").append("<li><div class=\"notif_sender_field\">" + response[i].notif_sender +
-                    "</div><div class=\"notif_text_field\">" + response[i].notif_text + "</div><div class=\"id_field\">" + response[i].notif_number +
-                    "</div><div class=\"type_field\">" + response[i].notif_theme + "</div><div class=\"state_field\">" + response[i].notif_status +
-                    "</div><div class=\"date_field\">" + moment(response[i].dat_notif.substring(0, 19), 'YYYY-MM-DDTHH:mm:ss').format('DD.MM.YYYY') + "</div><div class=\"clear\"></div></li>");
+                //var date2 ="";
+                for(var i = 0; i < response.length; i++)
+                {
+                    $(".listData").append("<li><div class=\"notif_sender_field\">" + response[i].notif_sender +
+                        "</div><div class=\"notif_text_field\">" + response[i].notif_text + "</div><div class=\"id_field\">" + response[i].notif_number +
+                        "</div><div class=\"type_field\">" + response[i].notif_theme + "</div><div class=\"state_field\">" + response[i].notif_status +
+                        "</div><div class=\"date_field\">" + moment(response[i].dat_notif.substring(0, 19), 'YYYY-MM-DDTHH:mm:ss').format('DD.MM.YYYY') + "</div><div class=\"clear\"></div></li>");
+                }
             }
+            document.location.href="#notifyListPage";
         }
     });
 }
 
-function getCityList()
-{
+function getCityList() {
     var langId = config.lang();
     var dataToPost = {
         lang_id: langId,
@@ -383,8 +367,7 @@ function getCityList()
     return response;
 }
 
-function getStreetList(city_id)
-{
+function getStreetList(city_id) {
     var langId = config.lang();
     var dataToPost = {
         lang_id: langId,
@@ -409,6 +392,66 @@ function getStreetList(city_id)
     return response;
 }
 
+function crObjList(s_name, l_name){
+    $('#'+l_name+' option').remove();
+    //$("#orderFilterStatus option").remove();
+    switch (s_name) {
+        case 'reqType': {
+            getOrderReqType(function(reqtype){
+                for(var i = 0; i < reqtype.length; i++) {
+                    if (reqtype[i].id==-100){
+                        $('#'+l_name).append($("<option/>", {
+                            value: reqtype[i].id,
+                            text : reqtype[i].text,
+                            disabled: 'disabled'
+                        }));
+                    }
+                    else {
+                        $('#'+l_name).append($("<option/>", {
+                            value: reqtype[i].id,
+                            html : "&#160;&#160;&#160;"+reqtype[i].text
+                        }));
+                    }
+                }
+                //$('#'+l_name).prop("selectedIndex", -1).trigger("change");
+            });
+        }
+            break;
+        case 'orderAddress': {
+            $('#'+l_name).append($("<option/>", {
+                value: "",
+                text : "...",
+                disabled: 'disabled'
+            }));
+            getUserAddress(function(addresses){
+                for(var i = 0; i < addresses.length; i++) {
+                    $('#'+l_name).append($("<option/>", {
+                        value: addresses[i].id,
+                        text : addresses[i].text
+                    }));
+                }
+            });
+        }
+            break;
+        case 'orderStatus': {
+            getStatuses(function(statuses){
+                for(var i = 0; i < statuses.length; i++) {
+                    $('#'+l_name).append($("<option/>", {
+                        value: statuses[i].id,
+                        text : statuses[i].text
+                    }));
+                }
+            });
+        }
+            break;
+        default: {
+            alert("Неизвестный парам, 439="+s_name);
+        }
+    }
+    $('#'+l_name).prop("selectedIndex", -1).trigger("change");
+
+}
+
 $("document").ready(function()
 {
     if (navigator.userAgent.match(/(iPod|iPhone|iPad)/)) {
@@ -423,8 +466,7 @@ $("document").ready(function()
 
     var login = localStorage.getItem("login");
     var password = localStorage.getItem("password");
-    if(config.authorized())
-    {
+    if(config.authorized() && (config.login()!=null)) {
         Login(login, password, function(){
             getClientData(function(){
                 hashChange();
@@ -460,33 +502,37 @@ $("document").ready(function()
     function hashChange() {
         var hash = window.location.hash;
         hash = hash.substring(1, hash.length);
-        if(config.availableContextMenu.indexOf(hash) != -1)
-        {
+        //alert('hashChange(), hash='+hash);
+        //alert('orderDateFrom='+$('#orderDateFrom').val()+', hash='+hash);
+
+        if(config.availableContextMenu.indexOf(hash) != -1) {
             $("#contextMenuOpenBtn").show();
         }
-        else
-        {
+        else {
             $("#contextMenuOpenBtn").hide();            
         }
 
         // Авторизация
-        if(hash == "" || hash == "mainPage" || hash == null)
-        {
+        if(hash == "" || hash == "mainPage" || hash == null) {
+//alert('hashChange().1');
             if(config.authorized()) {
+//alert('hashChange().1.1');
                 //window.history.forward();
                 //return;
                 hash = "notifyListPage";
+                //document.location.hash = "notifyListPage";
                 DrawNotifyList();
                 $("#contextMenuOpenBtn").show();
             }
             else {
+//alert('hashChange().1.2');
                 $(".page").hide();
                 $("#mainPage").css("display", "block");
                 return;
             }
         }
-        else
-        {
+        else {
+//alert('hashChange().2');
             if(!config.authorized()) {
                 if(hash != "forgotPassword" && hash != "registration")
                 {
@@ -497,88 +543,24 @@ $("document").ready(function()
             }            
         }
 
-        $(".page").hide();
-        $("#"+hash).css("display", "block");
-        if(hash == "orderAddPage")
-        {
-            $("#orderType option").not(':first').remove();
-            $("#orderAddress option").not(':first').remove();
-
-            getOrderReqType(function(reqtype){
-                for(var i = 0; i < reqtype.length; i++)
-                {
-                    $("#orderType").append($("<option/>", { 
-                        value: reqtype[i].id,
-                        text : reqtype[i].text 
-                    }));
-                }
-            });
-            
-            getUserAddress(function(addresses){
-                for(var i = 0; i < addresses.length; i++)
-                {
-                    $("#orderAddress").append($("<option/>", { 
-                        value: addresses[i].id,
-                        text : addresses[i].text 
-                    }));
-                }
-
-            });
-        }
-        else if(hash == "orderListPage")
-        {
-            var langId = config.lang();
+        if ($('#orderDateFrom').val() == ''){
             var today = new Date();
             var yesterday = new Date(today);
             yesterday.setMonth(today.getMonth() - 12);
-            var dataToPost = {
-                citreqs: 1,            
-                dat_reg_beg: yesterday.toJSON().slice(0, 10),
-                dat_reg_end: today.toJSON().slice(0, 10) + "23:59:59",
-                lang_id: langId,
-                req_status: 0,
-                userId: 1
-            };
-
-            if($("#orderDateFrom").val() != "")
-            {
-                return;
-            }
-
-            $.ajax({
-                url: config.url.orderList,
-                type: 'post',
-                contentType: 'application/json;charset=UTF-8',
-                timeout: config.timeout,
-                data: JSON.stringify(dataToPost),
-                beforeSend : function(xhr, opts){
-                    $(".overlay_progress").show();
-                },
-                success: function (response) {
-                    $(".listOrderData").html("");
-                    if(response != null)
-                    {
-                        for(var i = 0; i < response.length; i++)
-                        {
-                            $(".listOrderData").append("<li><div class=\"notif_sender_field\">" + response[i].req_user +
-                                "</div><div class=\"notif_text_field\">" + response[i].req_note + "</div><div class=\"id_field\">" +
-                                response[i].recid + "</div><div class=\"type_field\">" + response[i].req_type + "</div><div class=\"state_field\">" +
-                                response[i].req_status + "</div><div class=\"date_field\">" + moment(response[i].dat_reg.substring(0, 19), 'YYYY-MM-DDTHH:mm:ss').format('DD.MM.YYYY HH:mm:ss') +
-                                "</div><div class=\"clear\"></div></li>");
-                        }
-                    }
-                    document.location.href="#orderListPage";
-                },
-                error: function (result) {
-                    alert('Error in reqs list');
-                },
-                complete: function(event,xhr,options) {
-                    $(".overlay_progress").hide();
-                }
-            });
+            $('#orderDateFrom').val(yesterday.toDateInputValue());
+            $('#orderDateTo').val(today.toDateInputValue());
         }
-        else if(hash == "addrListPage")
-        {
+
+        $(".page").hide();
+        $("#"+hash).css("display", "block");
+        if(hash == "orderAddPage") {
+            crObjList('reqType', 'orderType');
+            crObjList('orderAddress', 'orderAddress');
+        }
+        else if(hash == "orderListPage") {
+            refOrderList();
+        }
+        else if(hash == "addrListPage") {
             var langId = config.lang();
             var dataToPost = {sqlpath: 'sprav/cit_address', lang_id: langId, userId: 1};
             $.ajax({
@@ -592,12 +574,13 @@ $("document").ready(function()
                 },
                 success: function (response) {
                     $(".listAddrData").html("");
+
                     if(response != null)
                     {
                         for(var i = 0; i < response.length; i++)
                         {
                             $(".listAddrData").append("<li>"+
-                                "<div class=\"type_field\">" + response[i].street + ", " + response[i].building + ", " + response[i].flat + "</div>"+
+                                "<div class=\"type_field\">" + response[i].street + ", " + response[i].building + ((response[i].fraction == null) ? "" : "/"+response[i].fraction) + ", " + response[i].flat + ((response[i].flat_fract == null) ? "" : "/"+response[i].flat_fract) + "</div>"+
                                 "<div class=\"state_field\">" + response[i].status + "</div>"+
                                 "<div class=\"type_field\">"+ response[i].ksk_description + "</div>"+
                                 "<div class=\"notif_id_field\">" + response[i].recid + "</div>"+
@@ -617,58 +600,19 @@ $("document").ready(function()
                 }
             });
         }
-        else if(hash == "feedbackAddPage")
-        {
+        else if(hash == "feedbackAddPage") {
             if (config.authorized()){
                 $('#feedbackfio').val(oClientData.user_info.first_name+' '+oClientData.user_info.last_name);
                 $('#feedbackphone').val(oClientData.user_info.phone_number);
                 $('#feedbackemail').val(oClientData.user_info.email);
             }
         }
-        else if(hash == "orderFilterPage")
-        {
-            var today = new Date();
-            var yesterday = new Date(today);
-            yesterday.setMonth(today.getMonth() - 12);
-
-            $('#orderDateFrom').val(yesterday.toDateInputValue());
-            $('#orderDateTo').val(today.toDateInputValue());
-            
-            $("#orderFilterType option").not(':first').remove();
-            $("#orderFilterAddress option").not(':first').remove();
-            $("#orderFilterStatus option").remove();
-
-            getOrderReqType(function(reqtype){
-                for(var i = 0; i < reqtype.length; i++)
-                {
-                    $("#orderFilterType").append($("<option/>", { 
-                        value: reqtype[i].id,
-                        text : reqtype[i].text 
-                    }));
-                }
-            });
-            getUserAddress(function(addresses){
-                for(var i = 0; i < addresses.length; i++)
-                {
-                    $("#orderFilterAddress").append($("<option/>", { 
-                        value: addresses[i].id,
-                        text : addresses[i].text 
-                    }));
-                }
-            });
-            getStatuses(function(statuses){
-                for(var i = 0; i < statuses.length; i++)
-                {
-                    $("#orderFilterStatus").append($("<option/>", { 
-                        value: statuses[i].id,
-                        text : statuses[i].text 
-                    }));
-                }
-
-            });
+        else if(hash == "orderFilterPage") {
+            crObjList('reqType', 'orderFilterType');
+            crObjList('orderAddress', 'orderFilterAddress');
+            crObjList('orderStatus', 'orderFilterStatus');
         }
-        else if(hash == "addrAddPage")
-        {
+        else if(hash == "addrAddPage") {
             if (config.authorized()){
                 $(".overlay_progress").show();
                 $("#addrCity").html('');
@@ -686,30 +630,29 @@ $("document").ready(function()
                 }
                 $(".overlay_progress").hide();
             }
-            $('#addrBuild').mask('9?999', {placeholder: ""});
+            $('#addrBuild').mask('`?```', {placeholder: ""});
             $('#addrBuildSub').mask('/?/////////', {placeholder: ""});
-            $('#addrFlat').mask('9?999', {placeholder: ""});
+            $('#addrFlat').mask('`?```', {placeholder: ""});
             $('#addrFlatSub').mask('/?/////////', {placeholder: ""});
 
         }
-        else if(hash == "exit" && config.authorized())
-        {
+        else if(hash == "exit" && config.authorized()) {
             Logout();
         }
-    };
+    }
 
     function isValidEmailAddress(emailAddress) {
         var pattern = /^([a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+(\.[a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)*|"((([ \t]*\r\n)?[ \t]+)?([\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|\\[\x01-\x09\x0b\x0c\x0d-\x7f\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))*(([ \t]*\r\n)?[ \t]+)?")@(([a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.)+([a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.?$/i;
         return pattern.test(emailAddress);
-    };
+    }
 
-    function getImage(suid, tabName, callback)
-    {
+    function getImage(suid, tabName, callback) {
         var dataToPost = {
             sqlpath: 'sprav/cur_image',
                 sid: parseInt(suid),
             tab_name: tabName
         };
+//alert('getImage.dataToPost='+JSON.stringify(dataToPost));
         var response = {};
         $.ajax({url: config.url.spr_oth,
             type: 'post',
@@ -734,8 +677,7 @@ $("document").ready(function()
         return response;
     }
 
-    function getOrderByid(id, callback)
-    {
+    function getOrderByid(id, callback) {
         var langId = config.lang();
 
         var dataToPost = {
@@ -779,8 +721,14 @@ $("document").ready(function()
     }
 
     function sendImageXHR(tab_id, tab_name) {
-        filesToSend[0].tableId=parseInt(tab_id);
+        if (filesToSend.length==0){
+            $(".overlay_progress").hide();
+            document.location.href="#orderListPage";
+            return true;
+        }
+        filesToSend[0].tableId= tab_id;
         filesToSend[0].table_name=tab_name;
+
         $.ajax({url: config.url.uploadImage2,
             type: 'post',
             contentType: 'application/json;charset=UTF-8',
@@ -790,16 +738,16 @@ $("document").ready(function()
                 $(".overlay_progress").show();
             },
             success: function (data, textStatus, request) {
+                //alert('sendImageXHR-success');
                 response = data;
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                alert('Error in upl_img');
+                alert('Error in upl_img='+ JSON.stringify(thrownError));
                 response = null;
             },
             complete: function(data)
             {
                 $(".overlay_progress").hide();
-                document.location.href="#orderListPage";
             }
         });
     }
@@ -827,6 +775,63 @@ $("document").ready(function()
                 reader.readAsDataURL(file);
             });
         }
+    }
+
+    function refOrderList(){
+        var langId = config.lang();
+        var dataToPost;
+        if($("#orderId").val().trim() == "") {
+            dataToPost = {
+                citreqs: 1,
+                dat_reg_beg: $("#orderDateFrom").val(),
+                dat_reg_end: $("#orderDateTo").val() + "23:59:59",
+                lang_id: langId,
+                req_status: parseInt($("#orderFilterStatus").val()),
+                req_type: parseInt($("#orderFilterType").val()),
+                userId: 1
+            };
+            //alert('prop.selectedIndex='+$("#orderFilterAddress").prop('selectedIndex'));
+            if ($("#orderFilterAddress").prop('selectedIndex')>-1){
+                dataToPost.t_flats_id=$("#orderFilterAddress").val();
+            }
+        }
+        else {
+            dataToPost = {
+                citreqs: 1,
+                id: parseInt($("#orderId").val()),
+                lang_id: langId
+            };
+        }
+        //alert('refOrderList, dataToPost='+JSON.stringify(dataToPost));
+        $.ajax({
+            url: config.url.orderList,
+            type: 'post',
+            contentType: 'application/json;charset=UTF-8',
+            timeout: config.timeout,
+            data: JSON.stringify(dataToPost),
+            beforeSend : function(xhr, opts){
+                $(".overlay_progress").show();
+            },
+            success: function (response) {
+                $(".listOrderData").html("");
+                //alert('refOrderList, response='+JSON.stringify(response));
+                if(response != null) {
+                    for(var i = 0; i < response.length; i++) {
+                        $(".listOrderData").append("<li><div class=\"notif_sender_field\">" + response[i].req_user +
+                            "</div><div class=\"notif_text_field\">" + response[i].req_note + "</div><div class=\"id_field\">" + response[i].recid +
+                            "</div><div class=\"type_field\">" + response[i].req_type + "</div><div class=\"state_field\">" + response[i].req_status +
+                            "</div><div class=\"date_field\">" + moment(response[i].dat_reg.substring(0, 19), 'YYYY-MM-DDTHH:mm:ss').format('DD.MM.YYYY HH:mm:ss') + "</div><div class=\"clear\"></div></li>");
+                    }
+                }
+                document.location.href="#orderListPage";
+            },
+            error: function (result) {
+                alert('Error in reqs_list2');
+            },
+            complete: function(event,xhr,options) {
+                $(".overlay_progress").hide();
+            }
+        });
     }
 
     $(window).on('hashchange',function(){
@@ -878,7 +883,7 @@ $("document").ready(function()
                     // one_times_code;
                 },
                 error: function(xhr, ajaxOptions, thrownError){
-                    alert(config.url.login +', line 876,'+JSON.stringify(thrownError));
+                    alert(config.url.login +', line 894,'+JSON.stringify(thrownError));
                 }
             });
 
@@ -899,7 +904,7 @@ $("document").ready(function()
                 },
                 error: function(xhr, ajaxOptions, thrownError){
                     alert("please check the internet connection");
-                    alert(config.url.login +', line 849,'+JSON.stringify(thrownError));
+                    alert(config.url.login +', line 915,'+JSON.stringify(thrownError));
                     Logout();
                 },
                 complete: function(event,xhr,options) {
@@ -909,87 +914,16 @@ $("document").ready(function()
         }
     });
     $(document).on("click", "#orderFilterBtn", function(){
-        var langId = config.lang();
-        var dataToPost = {};
-        if($("#orderId").val().trim() == "")
-        {
-            dataToPost = {
-                citreqs: 1,            
-                dat_reg_beg: $("#orderDateFrom").val(),
-                dat_reg_end: $("#orderDateTo").val() + "23:59:59",
-                lang_id: langId,
-                req_status: parseInt($("#orderFilterStatus").val()),
-                req_type: parseInt($("#orderFilterType").val()),
-                t_req_subtype_id: parseInt($("#orderReqSubType").val()),
-                userId: 1
-            };
-        }
-        else
-        {
-            dataToPost = {
-                citreqs: 1,
-                id: parseInt($("#orderId").val()),
-                lang_id: langId
-            };
-        }
-
-        $.ajax({
-            url: config.url.orderList,
-            type: 'post',
-            contentType: 'application/json;charset=UTF-8',
-            timeout: config.timeout,
-            data: JSON.stringify(dataToPost),
-            beforeSend : function(xhr, opts){
-                $(".overlay_progress").show();
-            },
-            success: function (response) {
-                $(".listOrderData").html("");
-                if(response != null)
-                {
-                    for(var i = 0; i < response.length; i++)
-                    {
-                        $(".listOrderData").append("<li><div class=\"notif_sender_field\">" + response[i].req_user +
-                            "</div><div class=\"notif_text_field\">" + response[i].req_note + "</div><div class=\"id_field\">" + response[i].recid +
-                            "</div><div class=\"type_field\">" + response[i].req_type + "</div><div class=\"state_field\">" + response[i].req_status +
-                            "</div><div class=\"date_field\">" + moment(response[i].dat_reg.substring(0, 19), 'YYYY-MM-DDTHH:mm:ss').format('DD.MM.YYYY HH:mm:ss') + "</div><div class=\"clear\"></div></li>");
-                    }
-                }
-
-                document.location.href="#orderListPage";
-            },
-            error: function (result) {
-                alert('Error in reqs_list2');
-            },
-            complete: function(event,xhr,options) {
-                $(".overlay_progress").hide();
-            }
-        });
+        refOrderList();
     });
     $(document).on("click", "#notifyFilterSearchBtn", function(){
-        $(".listData").html("");
-        var date = $("#notifyDate").val();
-        var status = parseInt($("#notifyStatus").val());
-        var theme = $("#notifyTheme").val();
-        var id = ($("#notifyId").val() == "") ? -1 : parseInt($("#notifyId").val());
-        var response = GetList(date, status, theme, id, function(){
-            if(response != null)
-            {
-                for(var i = 0; i < response.length; i++)
-                {
-                    $(".listData").append("<li><div class=\"notif_sender_field\">" + response[i].notif_sender + "</div><div class=\"notif_text_field\">" +
-                        response[i].notif_text + "</div><div class=\"id_field\">" + response[i].notif_number + "</div><div class=\"type_field\">" +
-                        response[i].notif_theme + "</div><div class=\"state_field\">" + response[i].notif_status + "</div><div class=\"date_field\">" +
-                        moment(response[i].dat_notif.substring(0, 19), 'YYYY-MM-DDTHH:mm:ss').format('DD.MM.YYYY') + "</div><div class=\"clear\"></div></li>");
-                }
-            }
-            document.location.href="#notifyListPage";
-        });
+        DrawNotifyList();
     });
     $(document).on("click", "ul.listData li", function(){
         var thisElem = this;
         if (config.pbtn==1) {
             config.pbtn=0;
-            DrawNotifyList();
+            //DrawNotifyList();
             return;
         }
         $(".overlay_progress").show();
@@ -1000,7 +934,7 @@ $("document").ready(function()
             $("#notifyLookUpTheme").val($(thisElem).find(".type_field").text());
             $("#notifyLookUpText").val($(thisElem).find(".notif_text_field").text());
 
-            document.location.href="#notifyLookUpPage";
+
             $(".overlay_progress").hide();
             $.ajax({
                 url: config.url.insReq,
@@ -1015,9 +949,13 @@ $("document").ready(function()
                 error: function (xhr, ajaxOptions, thrownError) {
                     response = null;
                     alert("Error in line 1002: "+JSON.stringify(xhr));
+                },
+                complete: function(event, xhr, options) {
+                    $(".overlay_progress").hide();
+                    document.location.href="#notifyLookUpPage";
                 }
             });
-            DrawNotifyList();
+            //DrawNotifyList();
         }, 500);
         
     });
@@ -1029,9 +967,7 @@ $("document").ready(function()
         var thisElem = this;
         $(".overlay_progress").show();
         setTimeout(function(){
-            document.location.href="#orderLookUpPage";
             var id = parseInt($(thisElem).find(".id_field").text());
-
             getOrderByid(id, function(data){
                 $("#orderIdLookUp").val(data.recid);
                 $("#orderSubTypeLookUp").val(data.req_subtype);
@@ -1040,14 +976,23 @@ $("document").ready(function()
                 $("#orderUrgentLookUp").val(data.req_priority);
                 $("#orderLookUpText").val(data.req_note);
                 getImage(id, 't_request', function(images){
-                    $("#orderLookUpPhotoPage .content").html("");
-                    for(var i = 0; i < images.length; i++)
-                    {
-                        $("#orderLookUpPhotoPage .content").append("<img src=" + config.url.root + images[i].file_id + " class=\"gallery\" />");
+                    if (images.length>0) {
+                        $("#orderLookUpPhotoPage .content").html("");
+                        //alert('images.length='+images.length);
+                        //alert('images='+JSON.stringify(images));
+                        for(var i = 0; i < images.length; i++)
+                        {
+                            $('#orderLookUpPhotoPage .content').append('<img src=' + config.url.root + images[i].file_id + ' class="gallery" />');
+                        }
+                        $("#orderPhotoShowBtn").show();
+                    }
+                    else {
+                        $("#orderPhotoShowBtn").hide();
                     }
                 });
             });
         }, 500);
+        document.location.href="#orderLookUpPage";
     });
     $(document).on("click", "ul.listAddrData li", function(){
         var thisElem = this;
@@ -1254,43 +1199,35 @@ $("document").ready(function()
     $(document).on("click", ".orderAddBtn", function(){
         var cur_btn=$(this);
         switch ($(cur_btn).attr('id')) {
-            case 'orderAddBtn':
-            {
+            case 'orderAddBtn': {
                 var orderText = $("#orderText").val().trim();
                 var orderType = parseInt($("#orderType").val());
                 var orderAddress = parseInt($("#orderAddress").val());
                 var validated = true;
-                if(isNaN(orderType))
-                {
-                    $("[for=\"orderType\"]").show();
+                if(isNaN(orderType)) {
+                    $('[for="orderType"][class="warning"]').show();
                     validated = false;
                 }
-                else
-                {
-                    $("[for=\"orderType\"]").hide();
+                else {
+                    $('[for="orderType"][class="warning"]').hide();
                 }
-                if(isNaN(orderAddress))
-                {
-                    $("[for=\"orderAddress\"]").show();
+                if(isNaN(orderAddress)) {
+                    $('[for="orderAddress"][class="warning"]').show();
                     validated = false;
                 }
-                else
-                {
-                    $("[for=\"orderAddress\"]").hide();
+                else {
+                    $('[for="orderAddress"][class="warning"]').hide();
                 }
-                if(orderText == "")
-                {
-                    $("[for=\"orderText\"]").show();
+                if(orderText == "") {
+                    $('[for="orderText"][class="warning"]').show();
                     validated = false;
                 }
-                else
-                {
-                    $("[for=\"orderText\"]").hide();
+                else {
+                    $('[for="orderText"][class="warning"]').hide();
                 }
                 if (validated!=true){
                     return validated;
                 }
-                $(".overlay_progress").show();
                 setTimeout(function () {
                     var dataToPost = {
                         req_subtype: parseInt($("#orderType").val()),
@@ -1303,6 +1240,7 @@ $("document").ready(function()
                         t_language_id: 1,
                         userMail: 1
                     };
+                    var req_id = null;
                     $.ajax({
                         url: config.url.insReq,
                         type: 'post',
@@ -1314,23 +1252,32 @@ $("document").ready(function()
                             $(".overlay_progress").show();
                         },
                         success: function (result) {
-                            var req_id = parseInt(result);
-                            for (var i = 0; i < filesToSend.length; i++) {
-                                filesToSend[i].req_id = req_id;
-                            }
+                            req_id = parseInt(result);
                             sendImageXHR(req_id, 't_request');
                         },
-                        error: function () {
-                            alert('Error in line 1282');
+                        error: function(xhr, ajaxOptions, thrownError){
+                            alert(config.url.login +', line 1336,'+JSON.stringify(thrownError));
                         },
                         complete: function (event, xhr, options) {
+                            $("#orderType").prop("selectedIndex", -1).trigger("change");
+
+                            $("#orderAddress").prop("selectedIndex", -1);
+                            //$("#orderAddress").trigger("change");
+
+                            $("#orderText").val('');
+
+                            filesToSend = [];
+                            $('.upload-images').remove();
+
+                            refOrderList();
+
                         }
                     });
                 }, 500);
+                //$(".overlay_progress").hide();
             }
                 break;
-            case 'feedAddBtn':
-            {
+            case 'feedAddBtn': {
                 var feedbackfio = $("#feedbackfio").val().trim();
                 var feedbackphone = $("#feedbackphone").val().trim();
                 var feedbackemail= $("#feedbackemail").val().trim();
@@ -1400,7 +1347,7 @@ $("document").ready(function()
 
                         },
                         error: function () {
-                            alert('Error in line 1361');
+                            alert('Error in line 1416');
                         },
                         complete: function (event, xhr, options) {
                             $(".overlay_progress").hide();
@@ -1410,8 +1357,7 @@ $("document").ready(function()
                 }, 500);
             }
                 break;
-            case 'addrAddBtn':
-            {
+            case 'addrAddBtn': {
                 var addrCity = parseInt($("#addrCity").val());
                 var addrStreet = parseInt($("#addrStreet").val());
                 var addrBuild = $("#addrBuild").val().trim();
@@ -1503,7 +1449,7 @@ $("document").ready(function()
                             
                         },
                         error: function (result) {
-                            alert('Error in line 1464');
+                            alert('Error in line 1519');
                         },
                         complete: function (event, xhr, options) {
                             $(".overlay_progress").hide();
@@ -1576,4 +1522,10 @@ $("document").ready(function()
             }));
         }
     });
+    /*$(document).on("click", "#orderAddLink", function(){
+        //hashChange();
+        document.location.href="#orderAddPage";
+        //location.reload();
+    });*/
+
 });

@@ -5,10 +5,6 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta http-equiv="Content-Security-Policy" content="default-src * 'self' data: gap:  https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; media-src *">
 		<link rel="stylesheet" href="css/phone-portrait.css" media="only screen and (min-width: 320px)" />
-		<!--<link rel="stylesheet" href="css/phone-landscape.css" media="only screen and (min-width: 480px)" />
-		<link rel="stylesheet" href="css/tablet-portrait.css" media="only screen and (min-width: 600px)" />
-		<link rel="stylesheet" href="css/tablet-landscape.css" media="only screen and (min-width: 801px)" />
-		<link rel="stylesheet" href="css/ultra-device.css" media="only screen and (min-width: 1025px)" />-->
 		<link rel="stylesheet" href="css/main.css" media="screen" />
 		<link rel="stylesheet" href="css/select2.css" rel="stylesheet"/>
 		<script type="text/javascript" charset="utf-8" src="js/jquery.min.js"></script>
@@ -48,7 +44,6 @@
 					<span class = "header_text" id="label_header">Войти в систему</span>
 					<span class = "language">&nbsp;</span>
 				</div>
-
 				<div class="content">
 					<div class="form">
 						<label for="loginField" class="warning" id="label_login">{%=o.not_filled%}</label>
@@ -66,9 +61,8 @@
 						<a class="small" href="#registration" id="lregistration">Регистрация</a>
 					</div>
 				</div>
-
 			</div>
-
+			
 		<div class="page" id="forgotPassword">
 			<div class="header">
 				<a class = "backBtn" href="#mainPage"></a>
@@ -183,6 +177,7 @@
 			</div>
 		</div>
 
+		<!-- Создание заявки -->
 		<div class="page" id="orderAddPage">
 			<div class="header">
 				<a class = "backBtn" href="#orderListPage"> </a>
@@ -191,26 +186,27 @@
 			</div>            
 			<div class="content">
 				<div class="form">
+					<label for="orderType">{%=o.order_type%}</label>
 					<label for="orderType" class="warning">{%=o.not_filled%}</label>
-					<select class="listofitem" id="orderType">
-						<option>{%=o.order_type%}</option>
-					</select>
+					<select class="select2-searchable" id="orderType"></select>
+
+					<label for="orderAddress">{%=o.order_address%}</label>
 					<label for="orderAddress" class="warning">{%=o.not_filled%}</label>
-					<select class="listofitem" id="orderAddress">
-						<option>{%=o.order_address%}</option>
-					</select>
+					<select class="select2-searchable" id="orderAddress"></select>
+
+					<label for="orderText">{%=o.order_text%}</label>
 					<label for="orderText" class="warning">{%=o.not_filled%}</label>
-					<textarea id="orderText" placeholder="{%=o.order_text%}"></textarea>
+					<textarea id="orderText"></textarea>
 					<div class="cameraButtons">						
 						<span class="attachFileBtn"></span>
 						<!--<input type="button" id="imageUploadBtn" />-->
 						<span class="cameraBtn"></span>
 					</div>					
-					<!--<input type="button" value="{%=o.send%}" id="orderSendBtn" />-->
 				</div>
 			</div>           
 		</div>
 
+		<!-- Фильтр для заявок -->
 		<div class="page" id="orderFilterPage">
 			<div class="header">
 				<a class = "backBtn" href="#orderListPage"> </a>
@@ -220,18 +216,15 @@
 			<div class="content">
 				<div class="form">
 					<input type="text" placeholder="{%=o.orderId%}" id="orderId" name="orderId"/>
-					<select class="listofitem" id="orderFilterType">
-						<option>{%=o.order_type%}</option>
+					<select class="select2-searchable" id="orderFilterType">
 					</select>
-					<select class="listofitem" id="orderFilterAddress">
-						<option>{%=o.order_address%}</option>
+					<select class="select2-searchable" id="orderFilterAddress">
 					</select>
-					<select class="listofitem" id="orderFilterStatus">
-						<option>{%=o.order_status%}</option>
+					<select class="select2-searchable" id="orderFilterStatus">
 					</select>
-					<select class="listofitem" id="orderReqSubType">
+					<!--select class="listofitem" id="orderReqSubType">
 						<option>{%=o.order_sub_reqtype%}</option>
-					</select>
+					</select-->
 					<input type="date" placeholder="{%=o.order_date_from%}" id="orderDateFrom" />
 					<input type="date" placeholder="{%=o.order_date_to%}" id="orderDateTo" />
 					<input type="button" value="{%=o.send%}" id="orderFilterBtn" />
@@ -263,14 +256,14 @@
 				<div class="form">
 					<label for="orderIdLookUp">{%=o.orderId%}</label>
 					<input type="text" placeholder="" id="orderIdLookUp" name="orderIdLookUp" readonly />
-					<label for="orderSubTypeLookUp">{%=o.order_sub_reqtype%}</label>
-					<input type="text" placeholder="" id="orderSubTypeLookUp" name="orderSubTypeLookUp" readonly />
+					<!--label for="orderSubTypeLookUp">{%=o.order_sub_reqtype%}</label>
+					<input type="text" placeholder="" id="orderSubTypeLookUp" name="orderSubTypeLookUp" readonly /-->
 					<label for="orderTypeLookUp">{%=o.order_type%}</label>
 					<input type="text" placeholder="" id="orderTypeLookUp" name="orderTypeLookUp" readonly />
 					<label for="orderAddressLookUp">{%=o.order_address%}</label>
 					<input type="text" placeholder="" id="orderAddressLookUp" name="orderAddressLookUp" readonly />
-					<label for="orderUrgentLookUp">{%=o.order_urgent%}</label>
-					<input type="text" placeholder="" id="orderUrgentLookUp" name="orderUrgentLookUp" readonly />
+					<!--label for="orderUrgentLookUp">{%=o.order_urgent%}</label>
+					<input type="text" placeholder="" id="orderUrgentLookUp" name="orderUrgentLookUp" readonly /-->
 					<label for="orderFinishTimeLookUp">{%=o.order_finish_time%}</label>
 					<input type="text" placeholder="" id="orderFinishTimeLookUp" name="orderFinishTimeLookUp" readonly />
 					<label for="orderLookUpText">{%=o.order_text%}</label>
@@ -323,6 +316,7 @@
 			</div>
 		</div>
 
+		<!-- Добавление адреса -->
 		<div class="page" id="addrAddPage">
 			<div class="header">
 				<a class = "backBtn" href="#addrListPage"> </a>
@@ -337,7 +331,6 @@
 					<label for="addrStreet">{%=o.street%}</label>
 					<label for="addrStreet" class="warning">{%=o.not_filled%}</label>
 					<select id="addrStreet" class="select2-searchable">
-						<!--select id="addrStreet" class="listofitem"-->
 					</select>
 					<label for="addrBuild">{%=o.building%}</label>
 					<label for="addrBuild" class="warning">{%=o.not_filled%}</label>
@@ -367,7 +360,8 @@
 		<div class="round-button-open" id="contextMenuOpenBtn"></div>
 		<div class="overlay">
 			<ul class="overlay-menu-list">
-				<li><a href="#orderAddPage">{%=o.send_order%}</a></li>
+				<li><a id="orderAddLink" href="#orderAddPage">{%=o.send_order%}</a></li>
+				<!--li><a id="orderAddLink">{%=o.send_order%}</a></li-->
 				<li><a href="#feedbackAddPage">{%=o.send_feedback%}</a></li>
 				<li><a href="#addrAddPage">{%=o.addr_add%}</a></li>
 				<li><div class="round-button-close" id="contextMenuOpenClose"></div></li>
