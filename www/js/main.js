@@ -5,6 +5,27 @@ var filesToSend = [];
 var oClientData={};
 var n_cp=0;
 
+var url_parser={
+    get_args: function (s) {
+        var tmp=new Array();
+        s=(s.toString()).split('&');
+        for (var i in s) {
+            i=s[i].split("=");
+            tmp[(i[0])]=i[1];
+        }
+        return tmp;
+    },
+    get_args_cookie: function (s) {
+        var tmp=new Array();
+        s=(s.toString()).split('; ');
+        for (var i in s) {
+            i=s[i].split("=");
+            tmp[(i[0])]=i[1];
+        }
+        return tmp;
+    }
+};
+
 Date.prototype.toDateInputValue = (function() {
     var local = new Date(this);
     local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
@@ -1492,6 +1513,152 @@ $("document").ready(function()
             $("#contextMenuOpenBtn").show();
         });
     });
+    $(document).on("click", "#snid", function(){
+        try {
+            var fbLoginSuccess = function (userData) {
+                if (userData.status=='connected'){
+                    facebookConnectPlugin.api("me/?fields=id,last_name,first_name,email", [],
+                        function onSuccess (response) {
+                            //alert("response: "+JSON.stringify(response));
+                            //alert('config.url.spr_oth='+config.url.spr_oth);
+                            // Проверяем наличие учетки FB email
+                            $.ajax({
+                                url: config.url.spr_oth,
+                                type: 'post',
+                                timeout: config.timeout,
+                                contentType: 'application/json;charset=UTF-8',
+                                data: JSON.stringify({
+                                    sqlpath: 'sprav/checkUser',
+                                    email: response.email
+                                }),
+                                success: function(result) {
+                                    //alert('res line 1533='+JSON.stringify(result));
+                                    if (result.length == 0) {
+                                        alert('1537, result.length');
+                                        var dataToPost = {
+                                            email: response.email,
+                                            name: response.first_name,
+                                            surname: response.last_name,
+                                            fbpass: response.id,
+                                            sntrue: 'FB'
+                                        };
+                                        // Добавляем учетную запись и сразу создаем сессию
+                                        $.ajax({
+                                            url: config.url.register,
+                                            type: 'put',
+                                            contentType: 'application/json;charset=UTF-8',
+                                            data: JSON.stringify(dataToPost),
+                                            success: function(result) {
+                                                //alert('result line 1548='+JSON.stringify(result));
+                                                Authorize();
+                                            },
+                                            error: function(jqXHR, textStatus, errorThrown) {
+                                                alert('line 1554,'+jqXHR.responseText)
+                                            }
+                                        })
+                                    } else if (result[0].exst === undefined) {
+                                        //alert('1563, result[0].exst === undefined');
+                                        var dataToPost = {
+                                            email: response.email,
+                                            name: response.first_name,
+                                            surname: response.last_name,
+                                            fbpass: response.id,
+                                            sntrue: 'FB'
+                                        };
+                                        var dataToPost2 = {
+                                            code: "1",
+                                            sdescription: response.email,
+                                            code2: fenter_id.toString(),
+                                            sdescription2: response.email,
+                                            sqlpath: 'req_after_auth'
+                                        };
+                                        $.ajax({
+                                            url: config.url.insReq,
+                                            type: 'post',
+                                            async: false,
+                                            contentType: 'application/json;charset=UTF-8',
+                                            data: JSON.stringify(dataToPost2),
+                                            success: function(result) {
+                                                $.ajax({
+                                                    url: config.url.register,
+                                                    type: 'put',
+                                                    contentType: 'application/json;charset=UTF-8',
+                                                    data: JSON.stringify(dataToPost),
+                                                    success: function(result) {
+                                                        //alert('result line 1586='+JSON.stringify(result));
+                                                        Authorize();
+                                                    },
+                                                    error: function(jqXHR, textStatus, errorThrown) {
+                                                        alert('line 1589,'+jqXHR.responseText);
+                                                    }
+                                                })
+                                            },
+                                            error: function(jqXHR, textStatus, errorThrown) {
+                                                alert('line 1594,'+jqXHR.responseText);
+                                            }
+                                        })
+                                    } else {
+                                        var dataToPost = {
+                                            code: "1",
+                                            sdescription: response.email,
+                                            code2: "1",
+                                            sdescription2: response.email,
+                                            sqlpath: 'req_after_auth'
+                                        };
+                                        //alert('line 1612, dataToPost='+JSON.stringify(dataToPost));
+                                        $.ajax({
+                                            url: config.url.insReq,
+                                            type: 'post',
+                                            async: false,
+                                            contentType: 'application/json;charset=UTF-8',
+                                            data: JSON.stringify(dataToPost),
+                                            success: function(result) {
+                                                $.ajax({
+                                                    url: config.url.auth_chk,
+                                                    type: "post",
+                                                    async: false,
+                                                    contentType: "application/json;charset=UTF-8",
+                                                    data: JSON.stringify({
+                                                        login: response.email,
+                                                        pass: response.id
+                                                    }),
+                                                    success: function(result) {
+                                                        //alert('result line 1626='+JSON.stringify(result));
+                                                        Authorize();
+                                                    },
+                                                    error: function(jqXHR, textStatus, errorThrown) {
+                                                        alert('line 1631,'+jqXHR.responseText);
+                                                    }
+                                                })
+                                            },
+                                            error: function(jqXHR, textStatus, errorThrown) {
+                                                alert('line 1633,'+jqXHR.responseText);
+                                            }
+                                        })
+                                    }
+                                },
+                                error: function(jqXHR, textStatus, errorThrown) {
+                                    alert('line 1645,'+JSON.stringify(jqXHR));
+                                }
+                            })
+
+                        }, function onError (error) {
+                            alert("line 1641: "+JSON.stringify(error));
+                        }
+                    );
+                }
+            };
+            facebookConnectPlugin.login(["public_profile"], fbLoginSuccess,
+                function loginError (error) {
+                    alert('line 1648,'+JSON.stringify(error))
+                }
+            );
+        }
+        catch (e) {
+            alert('line 1653,'+e.message);
+        }
+    });
+
     $(document).on("keyup", "#passwordField", function(){
         if ($(this).val()) {
             $("#visiblePassword").addClass("visiblePassword-show");

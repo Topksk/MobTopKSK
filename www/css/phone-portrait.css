@@ -645,3 +645,16 @@ img.gallery {
 .listofitem{
   height: 100px;
 }
+
+#snid{
+  display: block;
+  background: rgb(66, 103, 178);
+  width: 270px;
+  padding: 12px;
+  cursor: pointer;
+  color: #fff;
+  border: 0;
+  margin: auto;
+  font-size: 14px;
+  -webkit-appearance: none;
+}

@@ -24,7 +24,20 @@ var app = {
             .handleNotificationOpened(notificationOpenedCallback)
             .endInit();
 
+        window.open = cordova.InAppBrowser.open;
+
+        /*var fbLoginSuccess = function (userData) {
+            alert("UserInfo: ", userData);
+        };
+
+        facebookConnectPlugin.login(["public_profile"], fbLoginSuccess,
+            function loginError (error) {
+                alert(error)
+            }
+        );*/
+
         app.receivedEvent('deviceready');
+
 
         /*var vInfo =  'Device Name: ' + device.name + '\n' +
             'Device Cordova: ' + device.cordova + '\n' +

@@ -4,6 +4,8 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta http-equiv="Content-Security-Policy" content="default-src * 'self' data: gap:  https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; media-src *">
+		<!--meta http-equiv="Content-Security-Policy" content="default-src * gap://ready; style-src 'self' 'unsafe-inline'; img-src 'self' data:; script-src * 'unsafe-inline' 'unsafe-eval'"-->
+
 		<link rel="stylesheet" href="css/phone-portrait.css" media="only screen and (min-width: 320px)" />
 		<link rel="stylesheet" href="css/main.css" media="screen" />
 		<link rel="stylesheet" href="css/select2.css" rel="stylesheet"/>
@@ -58,6 +60,9 @@
 							</div>
 						<input type="button" value="Войти" id="loginBtn"/>
 						<a class="small" href="#forgotPassword" id="lforgotPassword">Восстановить пароль?</a>
+						<br/>
+						<input type="button" value="{%=o.fb_auth%}" id="snid"/>
+						<br/>
 						<a class="small" href="#registration" id="lregistration">Регистрация</a>
 					</div>
 				</div>

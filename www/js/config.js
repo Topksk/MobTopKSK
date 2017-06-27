@@ -16,7 +16,8 @@ var config = {
         orderList: rhost + "search/reqs",
         imageUrl: rhost + "sprav/subid",
         logout: rhost + "logout",
-        execFunc : rhost + "reqs/execFunc"
+        execFunc : rhost + "reqs/execFunc",
+        auth_chk: rhost + "auth?check_auths_sn"
     },
     lang: function() {
         return (localStorage.getItem("lang") == "KAZ") ? 2 : 1;
