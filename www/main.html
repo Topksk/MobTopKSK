@@ -30,6 +30,7 @@
 		</script>
 	</head>
 	<body>
+		<!-- Основное меню -->
 		<div class="slideMenu">
 			<ul class="menuList">
 				<li class="header" id="firstName"></li>
@@ -37,6 +38,7 @@
 				<li link="orderListPage">{%=o.order_list_header%}</li>
 				<li link="addrListPage">{%=o.address_list%}</li>
 				<li link="languagePage">{%=o.language%}</li>
+				<!--li link="cabinetPage" id="li_cab">{%=o.choos_cab%}</li-->
 				<li link="exit">{%=o.exit%}</li>
 			</ul>
 		</div>
@@ -191,13 +193,13 @@
 			</div>            
 			<div class="content">
 				<div class="form">
-					<label for="orderType">{%=o.order_type%}</label>
-					<label for="orderType" class="warning">{%=o.not_filled%}</label>
-					<select class="select2-searchable" id="orderType"></select>
-
 					<label for="orderAddress">{%=o.order_address%}</label>
 					<label for="orderAddress" class="warning">{%=o.not_filled%}</label>
 					<select class="select2-searchable" id="orderAddress"></select>
+
+					<label for="orderType">{%=o.order_type%}</label>
+					<label for="orderType" class="warning">{%=o.not_filled%}</label>
+					<select class="select2-searchable" id="orderType"></select>
 
 					<label for="orderText">{%=o.order_text%}</label>
 					<label for="orderText" class="warning">{%=o.not_filled%}</label>
@@ -221,18 +223,15 @@
 			<div class="content">
 				<div class="form">
 					<input type="text" placeholder="{%=o.orderId%}" id="orderId" name="orderId"/>
-					<select class="select2-searchable" id="orderFilterType">
-					</select>
-					<select class="select2-searchable" id="orderFilterAddress">
-					</select>
-					<select class="select2-searchable" id="orderFilterStatus">
-					</select>
+					<!--select class="select2-searchable" id="orderFilterType"></select-->
+					<!--select class="select2-searchable" id="orderFilterAddress"></select-->
+					<select class="select2-searchable" id="orderFilterStatus"></select>
 					<!--select class="listofitem" id="orderReqSubType">
 						<option>{%=o.order_sub_reqtype%}</option>
 					</select-->
 					<input type="date" placeholder="{%=o.order_date_from%}" id="orderDateFrom" />
 					<input type="date" placeholder="{%=o.order_date_to%}" id="orderDateTo" />
-					<input type="button" value="{%=o.send%}" id="orderFilterBtn" />
+					<input type="button" value="{%=o.search%}" id="orderFilterBtn" />
 				</div>
 			</div>            
 		</div>
@@ -246,8 +245,7 @@
 			</div>
             
 			<div class="content">
-				<ul class="listOrderData">
-				</ul>
+				<ul class="listOrderData"></ul>
 			</div>
 		</div>
 		
@@ -362,6 +360,23 @@
 			</div>
 		</div>
 
+		<!-- Смена кабинета -->
+		<div class="page" id="cabinetPage" >
+			<div class="header">
+				<span class = "menuBtn"></span>
+				<span class = "header_text">{%=o.choos_cab%}</span>
+			</div>
+			<div class="content">
+				<div class="form">
+					<select class="listofitem" id="cabinetList">
+						<option value="0">{%=o.citizs%}</option>
+						<option value="1">{%=o.ksks%}</option>
+					</select>
+				</div>
+			</div>
+		</div>
+
+		<!-- Дополнительное меню -->
 		<div class="round-button-open" id="contextMenuOpenBtn"></div>
 		<div class="overlay">
 			<ul class="overlay-menu-list">
@@ -384,5 +399,4 @@
 			setLanguage();
 		</script>		
 	</body>
-	
 </html>

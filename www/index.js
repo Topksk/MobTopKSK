@@ -26,36 +26,9 @@ var app = {
 
         window.open = cordova.InAppBrowser.open;
 
-        /*var fbLoginSuccess = function (userData) {
-            alert("UserInfo: ", userData);
-        };
-
-        facebookConnectPlugin.login(["public_profile"], fbLoginSuccess,
-            function loginError (error) {
-                alert(error)
-            }
-        );*/
-
+        //alert(StatusBar);
+        //alert(JSON.stringify(StatusBar));
         app.receivedEvent('deviceready');
-
-
-        /*var vInfo =  'Device Name: ' + device.name + '\n' +
-            'Device Cordova: ' + device.cordova + '\n' +
-            'Device Platform: ' + device.platform + '\n' +
-            'Device UUID: ' + device.uuid + '\n' +
-            'Device Version: '+ device.version;
-        alert(vInfo);*/
-
-        /*try{
-         alertObject(navigator);
-         navigator.notification.alert("Comprueba si has rellenado todos los campos.", null, "Información");
-         navigator.notification.alert("Unable to connect to server !");
-         }
-         catch(e)
-         {
-         alert(e.message);
-         }*/
-
 
     },
     // Update DOM on a Received Event
@@ -64,6 +37,5 @@ var app = {
         function onBackKeyDown(e) {
             e.preventDefault();
         }
-        
     }
 };

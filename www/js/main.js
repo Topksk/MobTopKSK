@@ -4,6 +4,7 @@ var langData;
 var filesToSend = [];
 var oClientData={};
 var n_cp=0;
+var g_city_id=0;
 
 var url_parser={
     get_args: function (s) {
@@ -75,16 +76,8 @@ function Login(login, password, callback) {
             $(".overlay_progress").show();
         },
         success: function(data){
-            //window.plugins.OneSignal.syncHashedEmail(login);
             window.plugins.OneSignal.sendTag("email", login.toLowerCase());
-            //window.plugins.OneSignal.deleteTag("key1");
-            //window.plugins.OneSignal.getIds(function(ids) {
-                //alert('1.getIds: ' + JSON.stringify(ids));
-                //alert("userId = " + ids.userId + ", pushToken = " + ids.pushToken);
-            //});
             callback();
-            //alert('login success, authorized='+localStorage.getItem("authorized"));
-            //localStorage.setItem("authorized", "true")
         },
         error: function(xhr, ajaxOptions, thrownError){
             alert("please check the internet connection");
@@ -157,21 +150,14 @@ function setLanguage() {
     {
         $("#contextMenuOpenBtn").hide();
     }
-
 }
 
 function getOrderReqType(callback) {
     var langId = config.lang();
-
-    var dataToPost = {
-        lang_id: langId,
-        name: "req_type_ksk"
-    };
-
+    var dataToPost = {lang_id: langId, g_city_id: g_city_id, sqlpath: 'sprav/req_type_ksk'};
     var response = [];
-
     $.ajax({
-        url: config.url.sprMain,
+        url: config.url.spr_oth,
         type: 'post',
         contentType: 'application/json;charset=UTF-8',
         data: JSON.stringify(dataToPost),
@@ -258,6 +244,40 @@ function getUserAddress(callback) {
     });   
 }
 
+function getcityID(callback) {
+    var response = [];
+    var dataToPost = {
+        sqlpath: "sprav/get_city_id_by_flat",
+        id: $("#orderAddress").val()
+    };
+
+    //alert("getcityID.dataToPost="+JSON.stringify(dataToPost));
+
+    $.ajax({
+        url: config.url.spr_oth,
+        type: 'post',
+        contentType: 'application/json;charset=UTF-8',
+        timeout: config.timeout,
+        beforeSend : function(xhr, opts){
+            $(".overlay_progress").show();
+        },
+        data: JSON.stringify(dataToPost),
+        success: function (result) {
+            response = result;
+            callback(response);
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            alert('Error in 274, getcityID');
+            //alert(JSON.stringify(textStatus));
+            $(".overlay_progress").hide();
+        },
+        complete: function(){
+            $(".overlay_progress").hide();
+        }
+    });
+}
+
+
 function Authorize() {
     $.ajax({
         url: config.url.current,
@@ -293,10 +313,6 @@ function Authorize() {
                 n_cp++;
                 localStorage.setItem("userFirstName", data.user_info.first_name);
                 n_cp++;
-                document.location.hash = "notifyListPage";
-                n_cp++;
-                DrawNotifyList();
-                n_cp++;
             }
             catch (e) {
                 alert('Line ' + n_cp + ',' + e.message+ ', data.user_info='+data.user_info);
@@ -304,6 +320,9 @@ function Authorize() {
         },
         error: function(xhr, ajaxOptions, thrownError){
             alert(getTranslate("auth_fail"));
+        },
+        complete: function() {
+            defCab(function(){});
         }
     });
 }
@@ -434,7 +453,7 @@ function crObjList(s_name, l_name){
                         }));
                     }
                 }
-                //$('#'+l_name).prop("selectedIndex", -1).trigger("change");
+                $('#'+l_name).prop("selectedIndex", -1).trigger("change");
             });
         }
             break;
@@ -445,12 +464,14 @@ function crObjList(s_name, l_name){
                 disabled: 'disabled'
             }));
             getUserAddress(function(addresses){
+//alert('addresses='+JSON.stringify(addresses));
                 for(var i = 0; i < addresses.length; i++) {
                     $('#'+l_name).append($("<option/>", {
                         value: addresses[i].id,
                         text : addresses[i].text
                     }));
                 }
+                $('#'+l_name).prop("selectedIndex", 0).trigger("change");
             });
         }
             break;
@@ -462,6 +483,7 @@ function crObjList(s_name, l_name){
                         text : statuses[i].text
                     }));
                 }
+                $('#'+l_name).prop("selectedIndex", -1).trigger("change");
             });
         }
             break;
@@ -469,8 +491,63 @@ function crObjList(s_name, l_name){
             alert("Неизвестный парам, 439="+s_name);
         }
     }
-    $('#'+l_name).prop("selectedIndex", -1).trigger("change");
+    //$('#'+l_name).prop("selectedIndex", -1).trigger("change");
 
+}
+
+function defCab(callback){
+    var dataToPost=JSON.stringify({sqlpath: 'sprav/check_emps', userId: 1});
+    //alert('dataToPost='+dataToPost);
+    var ob_Cab = document.getElementById("cabinetList");
+
+    $.ajax({
+        url: config.url.spr_oth,
+        type: 'post',
+        contentType: 'application/json;charset=UTF-8',
+        timeout: config.timeout,
+        data: dataToPost,
+        success: function(result) {
+            if (result != '') {
+                config.ksk_emp=result[0].ksk_emp;
+                if (config.ksk_emp>0){
+                     document.location.hash = "orderListPage";
+                     hash = "orderListPage";
+                     ob_Cab.options[1].selected="true";
+                     config.user_cab=$("#cabinetList").val();
+                    //alert("config.user_cab="+config.user_cab);
+                    //alertObject($("#cabinetList"));
+                    //alertObject($("#cabinetList").options);
+                    //document.getElementById("cabinetList").options.selectedIndex = "1";
+                    //alert("1");
+
+                    refOrderList();
+
+                    //config.user_cab=0;
+                    //$("#cabinetList").prop("selectedIndex", 0).trigger("change");
+                    //$("#cabinetList").val(1);
+                    //document.getElementById("cabinetList").options[1].selected=true;
+                }
+                 else {
+                     $("#li_cab").remove();
+                     document.location.hash = "notifyListPage";
+                     hash = "notifyListPage";
+                     //alert("0");
+                     DrawNotifyList();
+                     config.user_cab=0;
+                    //$("#cabinetList").prop("selectedIndex", 1).trigger("change");
+                    //$("#cabinetList").val(0);
+                 }
+                //$("#cabinetList").removeAttr("selected");
+                //$("#cabinetList [value='" + config.user_cab + "']").attr("selected", "selected");
+
+                //alert("config.user_cab=" + config.user_cab);
+                callback();
+            };
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            alert('line 495, jqXHR='+jqXHR.status_text);
+        }
+    });
 }
 
 $("document").ready(function()
@@ -495,6 +572,8 @@ $("document").ready(function()
         });
     }
     body_copy = $("body").html();
+
+    //alertObject(StatusBar);
 
     $("body").html(tmpl(body_copy, langData));
 
@@ -524,6 +603,7 @@ $("document").ready(function()
         var hash = window.location.hash;
         hash = hash.substring(1, hash.length);
         //alert('hashChange(), hash='+hash);
+        //alert('ksk_emp='+config.ksk_emp);
         //alert('orderDateFrom='+$('#orderDateFrom').val()+', hash='+hash);
 
         if(config.availableContextMenu.indexOf(hash) != -1) {
@@ -538,12 +618,7 @@ $("document").ready(function()
 //alert('hashChange().1');
             if(config.authorized()) {
 //alert('hashChange().1.1');
-                //window.history.forward();
-                //return;
-                hash = "notifyListPage";
-                //document.location.hash = "notifyListPage";
-                DrawNotifyList();
-                $("#contextMenuOpenBtn").show();
+                defCab(function(){});
             }
             else {
 //alert('hashChange().1.2');
@@ -553,7 +628,7 @@ $("document").ready(function()
             }
         }
         else {
-//alert('hashChange().2');
+// alert('hashChange().2');
             if(!config.authorized()) {
                 if(hash != "forgotPassword" && hash != "registration")
                 {
@@ -575,7 +650,7 @@ $("document").ready(function()
         $(".page").hide();
         $("#"+hash).css("display", "block");
         if(hash == "orderAddPage") {
-            crObjList('reqType', 'orderType');
+            //crObjList('reqType', 'orderType');
             crObjList('orderAddress', 'orderAddress');
         }
         else if(hash == "orderListPage") {
@@ -629,8 +704,8 @@ $("document").ready(function()
             }
         }
         else if(hash == "orderFilterPage") {
-            crObjList('reqType', 'orderFilterType');
-            crObjList('orderAddress', 'orderFilterAddress');
+            //crObjList('reqType', 'orderFilterType');
+            //crObjList('orderAddress', 'orderFilterAddress');
             crObjList('orderStatus', 'orderFilterStatus');
         }
         else if(hash == "addrAddPage") {
@@ -808,7 +883,7 @@ $("document").ready(function()
                 dat_reg_end: $("#orderDateTo").val() + "23:59:59",
                 lang_id: langId,
                 req_status: parseInt($("#orderFilterStatus").val()),
-                req_type: parseInt($("#orderFilterType").val()),
+                //req_type: parseInt($("#orderFilterType").val()),
                 userId: 1
             };
             //alert('prop.selectedIndex='+$("#orderFilterAddress").prop('selectedIndex'));
@@ -838,10 +913,14 @@ $("document").ready(function()
                 //alert('refOrderList, response='+JSON.stringify(response));
                 if(response != null) {
                     for(var i = 0; i < response.length; i++) {
-                        $(".listOrderData").append("<li><div class=\"notif_sender_field\">" + response[i].req_user +
-                            "</div><div class=\"notif_text_field\">" + response[i].req_note + "</div><div class=\"id_field\">" + response[i].recid +
-                            "</div><div class=\"type_field\">" + response[i].req_type + "</div><div class=\"state_field\">" + response[i].req_status +
-                            "</div><div class=\"date_field\">" + moment(response[i].dat_reg.substring(0, 19), 'YYYY-MM-DDTHH:mm:ss').format('DD.MM.YYYY HH:mm:ss') + "</div><div class=\"clear\"></div></li>");
+                        $(".listOrderData").append("<li>"+
+                            "<div class=\"notif_sender_field\">" + response[i].req_user + "</div>" +
+                            "<div class=\"notif_text_field\">" + response[i].req_note + "</div>" +
+                            "<div class=\"id_field\">" + response[i].recid +"</div>" +
+                            "<div class=\"type_field\">" + response[i].req_type + "</div>" +
+                            "<div class=\"state_field\">" + response[i].req_status + "</div>" +
+                            "<div class=\"date_field\">" + moment(response[i].dat_reg.substring(0, 19), 'YYYY-MM-DDTHH:mm:ss').format('DD.MM.YYYY HH:mm:ss') + "</div>" +
+                            "<div class=\"clear\"></div></li>");
                     }
                 }
                 document.location.href="#orderListPage";
@@ -886,28 +965,6 @@ $("document").ready(function()
 
         if(validated)
         {
-            var dataToPost = {
-                code: '1',
-                sdescription: login,
-                code2: '1',
-                sdescription2: login,
-                sqlpath: 'req_after_auth'
-            };
-
-            $.ajax({
-                url: config.url.insReq,
-                type: 'post',
-                async: false,
-                contentType: 'application/json;charset=UTF-8',
-                data: JSON.stringify(dataToPost),
-                success: function (result) {
-                    // one_times_code;
-                },
-                error: function(xhr, ajaxOptions, thrownError){
-                    alert(config.url.login +', line 894,'+JSON.stringify(thrownError));
-                }
-            });
-
             $.ajax({
                 url: config.url.login,
                 data: "role="+login+"&password="+password+"&authurl=login.html",
@@ -930,6 +987,27 @@ $("document").ready(function()
                 },
                 complete: function(event,xhr,options) {
                     $(".overlay_progress").hide();
+                    var dataToPost = {
+                        code: '1',
+                        sdescription: login,
+                        code2: '1',
+                        sdescription2: login,
+                        sqlpath: 'req_after_auth'
+                    };
+
+                    $.ajax({
+                        url: config.url.insReq,
+                        type: 'post',
+                        async: false,
+                        contentType: 'application/json;charset=UTF-8',
+                        data: JSON.stringify(dataToPost),
+                        success: function (result) {
+                            // one_times_code;
+                        },
+                        error: function(xhr, ajaxOptions, thrownError){
+                            alert(config.url.login +', line 894,'+JSON.stringify(thrownError));
+                        }
+                    });
                 }
             });            
         }
@@ -1519,8 +1597,6 @@ $("document").ready(function()
                 if (userData.status=='connected'){
                     facebookConnectPlugin.api("me/?fields=id,last_name,first_name,email", [],
                         function onSuccess (response) {
-                            //alert("response: "+JSON.stringify(response));
-                            //alert('config.url.spr_oth='+config.url.spr_oth);
                             // Проверяем наличие учетки FB email
                             $.ajax({
                                 url: config.url.spr_oth,
@@ -1689,10 +1765,32 @@ $("document").ready(function()
             }));
         }
     });
-    /*$(document).on("click", "#orderAddLink", function(){
-        //hashChange();
-        document.location.href="#orderAddPage";
-        //location.reload();
-    });*/
-
+    $(document).on("change", "#cabinetList", function(){
+        config.user_cab=$("#cabinetList").val();
+        //alert("user_cab="+user_cab);
+        if (config.user_cab==1){
+            document.location.hash = "orderListPage";
+        }
+        else {
+            document.location.hash = "notifyListPage";
+        }
+    });
+    $(document).on("change", "#orderAddress", function(){
+        //$(".overlay_progress").show();
+        //alertObject($("#orderAddress"));
+        //alert("onchange.orderAddress");
+        var f_id = $("#orderAddress").val();
+        //alert(f_id);
+        //alert(parseInt($("#orderAddress").val()));
+        //alert('hash='+window.location.hash);
+        //var ob_reqType = document.getElementById("reqType");
+        //alertObject(ob_reqType);
+        if (f_id){
+            getcityID(function(tcityId){
+                //alert('tcityId='+JSON.stringify(tcityId));
+                g_city_id=tcityId[0].id;
+                crObjList('reqType', 'orderType');
+            });
+        }
+    });
 });

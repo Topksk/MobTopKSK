@@ -40,5 +40,7 @@ var config = {
     savePassword: ((localStorage.getItem("savePassword") == "true") ? true : false),
     login: function() {
         return (localStorage.getItem("login"))},
-    availableContextMenu: ["notifyListPage", "orderListPage", "orderLookUpPage", "notifyLookUpPage", "languagePage", "addrListPage"]
+    availableContextMenu: ["notifyListPage", "orderListPage", "orderLookUpPage", "notifyLookUpPage", "languagePage", "addrListPage"],
+    ksk_emp: 0,
+    user_cab: 0
 };

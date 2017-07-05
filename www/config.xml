@@ -1,4 +1,4 @@
-<widget xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0" id="topksk" version="1.1.5">
+<widget xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0" id="topksk" version="1.1.7">
   <name>topksk</name>
   <description>Mobile Topksk</description>
   <author href="https://topksk.kz" email="dev@cloudmaker.kz">TopKSK Team</author>
@@ -26,6 +26,10 @@
     <param name="APP_ID" value="864320533668672" />
     <param name="APP_NAME" value="topksk" />
   </plugin>
+  <!--preference name="StatusBarOverlaysWebView" value="true" />
+  <feature name="StatusBar">
+    <param name="ios-package" value="CDVStatusBar" onload="true" />
+  </feature-->
   <icon src="icon.png"/>
   <platform name="android">
     <icon src="www/res/icon/android/topksk_ldpi.png" density="ldpi"/>
