@@ -9,7 +9,7 @@
     box-sizing: border-box;
     cursor: pointer;
     display: block;
-    height: 100px;  /*  высота выбранного поля */
+    height: 50px;  /*  высота выбранного поля */
     width: 100%;
     user-select: none;
     -webkit-user-select: none; }

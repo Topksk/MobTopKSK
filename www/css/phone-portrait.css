@@ -658,3 +658,11 @@ img.gallery {
   font-size: 14px;
   -webkit-appearance: none;
 }
+
+.req_hist {
+  display: none;
+}
+
+.listofitem2{
+  height: 30px;
+}

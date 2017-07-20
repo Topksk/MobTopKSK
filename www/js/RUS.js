@@ -1,5 +1,5 @@
 var RUS = {
-    "login_header_text": "Войти в систему TopKSK",
+    "login_header_text": "Вход в TopKSK",
     "login": "Логин",
     "password": "Пароль",
     "login_btn_text": "Войти",
@@ -27,7 +27,7 @@ var RUS = {
     "notify_text": "Текст уведомление",
     "cancel": "Отмена",
     "notify_lookup_header": "Просмотр уведомление",
-    "order_lookup_header": "Просмотр заявок",
+    "order_lookup_header": "Просмотр заявки",
     "order": "Заявка",
     "notification": "Уведомление",
     "exit": "Выход",
@@ -76,5 +76,11 @@ var RUS = {
     "fb_auth": "Вход через Facebook",
     "choos_cab": "Выбрать кабинет",
     "citizs": "Личный кабинет",
-    "ksks": "Кабинет КСК"
+    "ksks": "Кабинет КСК",
+    "email_activ": "Неверный логин / логин не активирован, проверьте электронную почту.",
+    "execution": "Выполнение",
+    "descr": "Описание",
+    "processing": "В работу",
+    "position_type": "Роль",
+    "fullName": "ФИО"
 };

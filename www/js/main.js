@@ -5,27 +5,7 @@ var filesToSend = [];
 var oClientData={};
 var n_cp=0;
 var g_city_id=0;
-
-var url_parser={
-    get_args: function (s) {
-        var tmp=new Array();
-        s=(s.toString()).split('&');
-        for (var i in s) {
-            i=s[i].split("=");
-            tmp[(i[0])]=i[1];
-        }
-        return tmp;
-    },
-    get_args_cookie: function (s) {
-        var tmp=new Array();
-        s=(s.toString()).split('; ');
-        for (var i in s) {
-            i=s[i].split("=");
-            tmp[(i[0])]=i[1];
-        }
-        return tmp;
-    }
-};
+var cur_req={};
 
 Date.prototype.toDateInputValue = (function() {
     var local = new Date(this);
@@ -133,7 +113,8 @@ function setLanguage() {
         $(".language").text(langTxt);
     }
     $("#languageList").val(langTxt);
-    $("#label_header").text(getTranslate("login_header_text"));
+    //alert('3. AppVer='+AppVer);
+    $("#label_header").text(getTranslate("login_header_text")+AppVer);
     $("#loginBtn").val(getTranslate("login_btn_text"));
     $("#lsavePassword").text(getTranslate("save_password"));
 
@@ -277,7 +258,6 @@ function getcityID(callback) {
     });
 }
 
-
 function Authorize() {
     $.ajax({
         url: config.url.current,
@@ -302,17 +282,22 @@ function Authorize() {
                     localStorage.setItem("password", $("#passwordField").val());
                     localStorage.setItem("savePassword", true);
                 }
-                n_cp++;
-                $("#firstName").text(data.user_info.first_name);
-                n_cp++;
-                localStorage.setItem("authorized", "true");
-                n_cp++;
-                $(this).attr("type", "password");
-                n_cp++;
-                $("#visiblePassword").removeClass("visiblePassword-show");
-                n_cp++;
-                localStorage.setItem("userFirstName", data.user_info.first_name);
-                n_cp++;
+                if (data.user_info==undefined){
+                    alert(getTranslate("email_activ"));
+                }
+                else {
+                    n_cp++;
+                    $("#firstName").text(data.user_info.first_name);
+                    n_cp++;
+                    localStorage.setItem("authorized", "true");
+                    n_cp++;
+                    $(this).attr("type", "password");
+                    n_cp++;
+                    $("#visiblePassword").removeClass("visiblePassword-show");
+                    n_cp++;
+                    localStorage.setItem("userFirstName", data.user_info.first_name);
+                    n_cp++;
+                }
             }
             catch (e) {
                 alert('Line ' + n_cp + ',' + e.message+ ', data.user_info='+data.user_info);
@@ -432,6 +417,81 @@ function getStreetList(city_id) {
     return response;
 }
 
+function getExecPosType(callback) {
+    var langId = config.lang();
+    var dataToPost = {lang_id: langId, ksk_id: cur_req.ksk_id, sqlpath: 'sprav/position_type_byKSK'};
+    var response = [];
+    $.ajax({
+        url: config.url.spr_oth,
+        type: 'post',
+        contentType: 'application/json;charset=UTF-8',
+        data: JSON.stringify(dataToPost),
+        timeout: config.timeout,
+        beforeSend : function(xhr, opts){
+            $(".overlay_progress").show();
+        },
+        success: function (result) {
+            response = result;
+            callback(response)
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            alert('Error in ExecPosType list');
+        },
+        complete: function(){
+        }
+    });
+}
+
+function getExecFIO(callback) {
+    var langId = config.lang();
+    var dataToPost = {pos_type: Number($("#execPosType").val()), ksk_id: cur_req.ksk_id, sqlpath: 'sprav/executor_name'};
+    var response = [];
+    $.ajax({
+        url: config.url.spr_oth,
+        type: 'post',
+        contentType: 'application/json;charset=UTF-8',
+        data: JSON.stringify(dataToPost),
+        timeout: config.timeout,
+        beforeSend : function(xhr, opts){
+            $(".overlay_progress").show();
+        },
+        success: function (result) {
+            response = result;
+            callback(response)
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            alert('Error in ExecFIO list');
+        },
+        complete: function(){
+        }
+    });
+}
+
+function getOrderPriority(callback) {
+    var langId = config.lang();
+    var dataToPost = {lang_id: langId, sqlpath: 'sprav/req_priority'};
+    var response = [];
+    $.ajax({
+        url: config.url.spr_oth,
+        type: 'post',
+        contentType: 'application/json;charset=UTF-8',
+        data: JSON.stringify(dataToPost),
+        timeout: config.timeout,
+        beforeSend : function(xhr, opts){
+            $(".overlay_progress").show();
+        },
+        success: function (result) {
+            response = result;
+            callback(response)
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            alert('Error in OrderPriority list');
+        },
+        complete: function(){
+        }
+    });
+}
+
 function crObjList(s_name, l_name){
     $('#'+l_name+' option').remove();
     //$("#orderFilterStatus option").remove();
@@ -477,22 +537,70 @@ function crObjList(s_name, l_name){
             break;
         case 'orderStatus': {
             getStatuses(function(statuses){
+                //alert('orderStatus='+JSON.stringify(statuses));
                 for(var i = 0; i < statuses.length; i++) {
                     $('#'+l_name).append($("<option/>", {
                         value: statuses[i].id,
                         text : statuses[i].text
                     }));
                 }
+                //alert('crObjList, config.user_cab='+config.user_cab);
+                if (config.user_cab==1){
+                    $('#'+l_name).prop("selectedIndex", 0).trigger("change");
+                }
+                else {
+                    $('#'+l_name).prop("selectedIndex", -1).trigger("change");
+                }
+            });
+        }
+            break;
+        case 'execPosType': {
+            getExecPosType(function(execposits){
+                //alert('execPosType='+JSON.stringify(execposits));
+                for(var i = 0; i < execposits.length; i++) {
+                    $('#'+l_name).append($("<option/>", {
+                        value: execposits[i].id,
+                        text : execposits[i].text
+                    }));
+                }
                 $('#'+l_name).prop("selectedIndex", -1).trigger("change");
+                //alert('filled execPosType');
+                $(".overlay_progress").hide();
+            });
+        }
+            break;
+        case 'execPosition': {
+            getExecFIO(function(execfio){
+                //alert('execPosType='+JSON.stringify(execposits));
+                for(var i = 0; i < execfio.length; i++) {
+                    $('#'+l_name).append($("<option/>", {
+                        value: execfio[i].id,
+                        text : execfio[i].text
+                    }));
+                }
+                $('#'+l_name).prop("selectedIndex", -1).trigger("change");
+                //alert('filled execPosType');
+                $(".overlay_progress").hide();
+            });
+        }
+            break;
+        case 'orderPriority': {
+            getOrderPriority(function(execfio){
+                for(var i = 0; i < execfio.length; i++) {
+                    $('#'+l_name).append($("<option/>", {
+                        value: execfio[i].id,
+                        text : execfio[i].text
+                    }));
+                }
+                $('#'+l_name).prop("selectedIndex", 1).trigger("change");
+                $(".overlay_progress").hide();
             });
         }
             break;
         default: {
-            alert("Неизвестный парам, 439="+s_name);
+            alert("Неизвестный парам, 521="+s_name);
         }
     }
-    //$('#'+l_name).prop("selectedIndex", -1).trigger("change");
-
 }
 
 function defCab(callback){
@@ -510,37 +618,23 @@ function defCab(callback){
             if (result != '') {
                 config.ksk_emp=result[0].ksk_emp;
                 if (config.ksk_emp>0){
+                    $("#li_notif").hide();
+                    $("#li_adr").hide();
                      document.location.hash = "orderListPage";
                      hash = "orderListPage";
                      ob_Cab.options[1].selected="true";
                      config.user_cab=$("#cabinetList").val();
-                    //alert("config.user_cab="+config.user_cab);
-                    //alertObject($("#cabinetList"));
-                    //alertObject($("#cabinetList").options);
-                    //document.getElementById("cabinetList").options.selectedIndex = "1";
-                    //alert("1");
-
                     refOrderList();
-
-                    //config.user_cab=0;
-                    //$("#cabinetList").prop("selectedIndex", 0).trigger("change");
-                    //$("#cabinetList").val(1);
-                    //document.getElementById("cabinetList").options[1].selected=true;
                 }
                  else {
                      $("#li_cab").remove();
+                     $("#li_notif").show();
+                    $("#li_adr").show();
                      document.location.hash = "notifyListPage";
                      hash = "notifyListPage";
-                     //alert("0");
                      DrawNotifyList();
                      config.user_cab=0;
-                    //$("#cabinetList").prop("selectedIndex", 1).trigger("change");
-                    //$("#cabinetList").val(0);
                  }
-                //$("#cabinetList").removeAttr("selected");
-                //$("#cabinetList [value='" + config.user_cab + "']").attr("selected", "selected");
-
-                //alert("config.user_cab=" + config.user_cab);
                 callback();
             };
         },
@@ -573,8 +667,6 @@ $("document").ready(function()
     }
     body_copy = $("body").html();
 
-    //alertObject(StatusBar);
-
     $("body").html(tmpl(body_copy, langData));
 
     $(document).on("click", "#contextMenuOpenBtn",  function() {
@@ -587,6 +679,7 @@ $("document").ready(function()
         });
         
     });
+    crObjList('orderStatus', 'orderFilterStatus');
 
     function updateLanguage() {
         var lang = $(".language").text().trim();
@@ -602,17 +695,12 @@ $("document").ready(function()
     function hashChange() {
         var hash = window.location.hash;
         hash = hash.substring(1, hash.length);
-        //alert('hashChange(), hash='+hash);
-        //alert('ksk_emp='+config.ksk_emp);
-        //alert('orderDateFrom='+$('#orderDateFrom').val()+', hash='+hash);
-
         if(config.availableContextMenu.indexOf(hash) != -1) {
             $("#contextMenuOpenBtn").show();
         }
         else {
             $("#contextMenuOpenBtn").hide();            
         }
-
         // Авторизация
         if(hash == "" || hash == "mainPage" || hash == null) {
 //alert('hashChange().1');
@@ -638,7 +726,6 @@ $("document").ready(function()
                 }                                
             }            
         }
-
         if ($('#orderDateFrom').val() == ''){
             var today = new Date();
             var yesterday = new Date(today);
@@ -646,11 +733,9 @@ $("document").ready(function()
             $('#orderDateFrom').val(yesterday.toDateInputValue());
             $('#orderDateTo').val(today.toDateInputValue());
         }
-
         $(".page").hide();
         $("#"+hash).css("display", "block");
         if(hash == "orderAddPage") {
-            //crObjList('reqType', 'orderType');
             crObjList('orderAddress', 'orderAddress');
         }
         else if(hash == "orderListPage") {
@@ -706,7 +791,7 @@ $("document").ready(function()
         else if(hash == "orderFilterPage") {
             //crObjList('reqType', 'orderFilterType');
             //crObjList('orderAddress', 'orderFilterAddress');
-            crObjList('orderStatus', 'orderFilterStatus');
+            //crObjList('orderStatus', 'orderFilterStatus');
         }
         else if(hash == "addrAddPage") {
             if (config.authorized()){
@@ -732,6 +817,10 @@ $("document").ready(function()
             $('#addrFlatSub').mask('/?/////////', {placeholder: ""});
 
         }
+        else if(hash == "orderProcPage") {
+            crObjList('orderPriority', 'orderPriority');
+            crObjList('execPosType', 'execPosType');
+        }
         else if(hash == "exit" && config.authorized()) {
             Logout();
         }
@@ -748,7 +837,6 @@ $("document").ready(function()
                 sid: parseInt(suid),
             tab_name: tabName
         };
-//alert('getImage.dataToPost='+JSON.stringify(dataToPost));
         var response = {};
         $.ajax({url: config.url.spr_oth,
             type: 'post',
@@ -765,9 +853,7 @@ $("document").ready(function()
             error: function (xhr, ajaxOptions, thrownError) {
                 response = null;
                 alert('Error in img_url list');
-            },
-            complete: function(event,xhr,options) {
-                $(".overlay_progress").hide();
+
             }
         });
         return response;
@@ -874,33 +960,74 @@ $("document").ready(function()
     }
 
     function refOrderList(){
+        var nOrderStatus=null;
         var langId = config.lang();
-        var dataToPost;
-        if($("#orderId").val().trim() == "") {
-            dataToPost = {
-                citreqs: 1,
-                dat_reg_beg: $("#orderDateFrom").val(),
-                dat_reg_end: $("#orderDateTo").val() + "23:59:59",
-                lang_id: langId,
-                req_status: parseInt($("#orderFilterStatus").val()),
-                //req_type: parseInt($("#orderFilterType").val()),
-                userId: 1
-            };
-            //alert('prop.selectedIndex='+$("#orderFilterAddress").prop('selectedIndex'));
-            if ($("#orderFilterAddress").prop('selectedIndex')>-1){
-                dataToPost.t_flats_id=$("#orderFilterAddress").val();
+        if ($("#orderFilterStatus").val() == null){
+            if (config.user_cab==1) {
+                nOrderStatus= 0;
+                $('#orderFilterStatus').prop("selectedIndex", nOrderStatus).trigger("change");
             }
         }
         else {
-            dataToPost = {
-                citreqs: 1,
-                id: parseInt($("#orderId").val()),
-                lang_id: langId
-            };
+            nOrderStatus=parseInt($("#orderFilterStatus").val());
         }
-        //alert('refOrderList, dataToPost='+JSON.stringify(dataToPost));
+        var req_url=config.url.orderList;
+        var dataToPost;
+        if (config.user_cab==1) {
+            req_url=config.url.spr_oth;
+            if($("#orderId").val().trim() == "") {
+                if (nOrderStatus==0) {
+                    nOrderStatus='{1,2,3,7}';
+                }
+                else {
+                    nOrderStatus='{'+ nOrderStatus+'}';
+                };
+
+                dataToPost = {
+                    sqlpath: config.url.orderList2,
+                    t_language_id: langId,
+                    t_rel_status: nOrderStatus,
+                    userId: 1,
+                    dat_reg_beg: $("#orderDateFrom").val(),
+                    dat_reg_end: $("#orderDateTo").val() + " 23:59:59",
+                    req_id: null
+                };
+            }
+            else {
+                dataToPost = {
+                    sqlpath: config.url.orderList2,
+                    t_language_id: langId,
+                    t_rel_status: '{1,2,3,4,5,6,7,8,9}',
+                    userId: 1,
+                    dat_reg_beg: null,
+                    dat_reg_end: null,
+                    req_id: parseInt($("#orderId").val())
+                };
+            }
+        }
+        else {
+            if($("#orderId").val().trim() == "") {
+                dataToPost = {
+                    lang_id: langId,
+                    req_status: nOrderStatus,
+                    userId: 1,
+                    dat_reg_beg: $("#orderDateFrom").val(),
+                    dat_reg_end: $("#orderDateTo").val() + "23:59:59",
+                    citreqs: 1
+                };
+                if ($("#orderFilterAddress").prop('selectedIndex')>-1){
+                    dataToPost.t_flats_id=$("#orderFilterAddress").val();
+                }
+            }
+            else {
+                dataToPost = {
+                    lang_id: langId,
+                    id: parseInt($("#orderId").val())
+                };
+            }
+        }
         $.ajax({
-            url: config.url.orderList,
+            url: req_url,
             type: 'post',
             contentType: 'application/json;charset=UTF-8',
             timeout: config.timeout,
@@ -910,19 +1037,25 @@ $("document").ready(function()
             },
             success: function (response) {
                 $(".listOrderData").html("");
-                //alert('refOrderList, response='+JSON.stringify(response));
                 if(response != null) {
                     for(var i = 0; i < response.length; i++) {
                         $(".listOrderData").append("<li>"+
-                            "<div class=\"notif_sender_field\">" + response[i].req_user + "</div>" +
-                            "<div class=\"notif_text_field\">" + response[i].req_note + "</div>" +
+                            //"<div class=\"notif_sender_field\">" + response[i].req_user + "</div>" +
+                            //"<div class=\"notif_text_field\">" + response[i].req_note + "</div>" +
+                            "<div class=\"req_hist\" id=\"req_stat\">" + response[i].t_req_status_id + "</div>" +
+                            "<div class=\"req_hist\" id=\"hist_id\">" + response[i].hist_id + "</div>" +
+                            "<div class=\"req_hist\" id=\"tpos\">" + response[i].tpos+ "</div>" +
+                            "<div class=\"req_hist\" id=\"ksk_id\">" + response[i].ksk_id+ "</div>" +
                             "<div class=\"id_field\">" + response[i].recid +"</div>" +
                             "<div class=\"type_field\">" + response[i].req_type + "</div>" +
                             "<div class=\"state_field\">" + response[i].req_status + "</div>" +
                             "<div class=\"date_field\">" + moment(response[i].dat_reg.substring(0, 19), 'YYYY-MM-DDTHH:mm:ss').format('DD.MM.YYYY HH:mm:ss') + "</div>" +
-                            "<div class=\"clear\"></div></li>");
+                            "<div class=\"clear\"></div>" +
+                            "</li>");
                     }
                 }
+                //$("#orderListHeader").text(getTranslate("order_list_header")+", "+rhost);
+                $("#orderListHeader").text(getTranslate("order_list_header"));
                 document.location.href="#orderListPage";
             },
             error: function (result) {
@@ -965,51 +1098,75 @@ $("document").ready(function()
 
         if(validated)
         {
+            var dataToPost = {sqlpath: "auth/admin_login", email: login.toLowerCase()};
+            var response = [];
             $.ajax({
-                url: config.url.login,
-                data: "role="+login+"&password="+password+"&authurl=login.html",
-                contentType: 'application/x-www-form-urlencoded',
+                url: config.url.spr_oth,
+                type: 'post',
+                contentType: 'application/json;charset=UTF-8',
+                data: JSON.stringify(dataToPost),
                 timeout: config.timeout,
-                type: 'POST',
-                processData: false,
-                crossDomain: true,
                 beforeSend : function(xhr, opts){
                     $(".overlay_progress").show();
                 },
-                success: function(data){
-                    window.plugins.OneSignal.sendTag("email", login.toLowerCase());
-                    Authorize();
-                },
-                error: function(xhr, ajaxOptions, thrownError){
-                    alert("please check the internet connection");
-                    alert(config.url.login +', line 915,'+JSON.stringify(thrownError));
-                    Logout();
-                },
-                complete: function(event,xhr,options) {
-                    $(".overlay_progress").hide();
-                    var dataToPost = {
-                        code: '1',
-                        sdescription: login,
-                        code2: '1',
-                        sdescription2: login,
-                        sqlpath: 'req_after_auth'
-                    };
+                success: function (result) {
+                    response = result;
+                    if (response.length==0){
+                        alert('Line 1008'+getTranslate("email_activ"));
+                        $(".overlay_progress").hide();
+                        return false;
+                    }
+                    if (response[0].usermail1==dataToPost.email){
+                        $.ajax({
+                            url: config.url.login,
+                            data: "role="+login+"&password="+password+"&authurl=login.html",
+                            contentType: 'application/x-www-form-urlencoded',
+                            timeout: config.timeout,
+                            type: 'POST',
+                            processData: false,
+                            crossDomain: true,
+                            success: function(data){
+                                window.plugins.OneSignal.sendTag("email", login.toLowerCase());
+                                Authorize();
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                alert('Line 1029'+getTranslate("auth_fail"));
+                                Logout();
+                            },
+                            complete: function(event,xhr,options) {
+                                $(".overlay_progress").hide();
+                                var dataToPost = {
+                                    code: '1',
+                                    sdescription: login,
+                                    code2: '1',
+                                    sdescription2: login,
+                                    sqlpath: 'req_after_auth'
+                                };
 
-                    $.ajax({
-                        url: config.url.insReq,
-                        type: 'post',
-                        async: false,
-                        contentType: 'application/json;charset=UTF-8',
-                        data: JSON.stringify(dataToPost),
-                        success: function (result) {
-                            // one_times_code;
-                        },
-                        error: function(xhr, ajaxOptions, thrownError){
-                            alert(config.url.login +', line 894,'+JSON.stringify(thrownError));
-                        }
-                    });
+                                $.ajax({
+                                    url: config.url.insReq,
+                                    type: 'post',
+                                    async: false,
+                                    contentType: 'application/json;charset=UTF-8',
+                                    data: JSON.stringify(dataToPost),
+                                    success: function (result) {
+                                        // one_times_code;
+                                    },
+                                    error: function(xhr, ajaxOptions, thrownError){
+                                        alert('Line 1052, '+JSON.stringify(thrownError));
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    else {
+                        alert('Line 1059'+getTranslate("email_activ"));
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert('Line 1063, '+JSON.stringify(textStatus));
                 }
-            });            
+            });
         }
     });
     $(document).on("click", "#orderFilterBtn", function(){
@@ -1067,27 +1224,55 @@ $("document").ready(function()
         $(".overlay_progress").show();
         setTimeout(function(){
             var id = parseInt($(thisElem).find(".id_field").text());
+            cur_req.recid=id;
+            cur_req.idhist=Number($(thisElem).find("#hist_id").text());
+            cur_req.req_stat=Number($(thisElem).find("#req_stat").text());
+            cur_req.tpos=Number($(thisElem).find("#tpos").text());
+            cur_req.ksk_id=Number($(thisElem).find("#ksk_id").text());
+
+            $("#orderExecute").hide();
+            $("#orderProc").hide();
+
+            if (cur_req.req_stat=='3') {
+                $("#orderExecute").show();
+            }
+            else {
+                if ((cur_req.req_stat=='1') || (cur_req.req_stat=='7')) {
+                    $("#orderProc").show();
+                }
+            }
+
             getOrderByid(id, function(data){
                 $("#orderIdLookUp").val(data.recid);
-                $("#orderSubTypeLookUp").val(data.req_subtype);
+                //$("#orderSubTypeLookUp").val(data.req_subtype);
                 $("#orderTypeLookUp").val(data.req_type);
                 $("#orderAddressLookUp").val(data.req_address);
                 $("#orderUrgentLookUp").val(data.req_priority);
                 $("#orderLookUpText").val(data.req_note);
+
+                if (data.req_deadline) {
+                    if (data.req_deadline.length>=10){
+                        $("#orderFinishTimeLookUp").val(moment(data.req_deadline.substring(0, 10), 'YYYY-MM-DD').format('DD.MM.YYYY'));
+                    }
+                }
+
                 getImage(id, 't_request', function(images){
                     if (images.length>0) {
                         $("#orderLookUpPhotoPage .content").html("");
                         //alert('images.length='+images.length);
                         //alert('images='+JSON.stringify(images));
-                        for(var i = 0; i < images.length; i++)
-                        {
+                        for(var i = 0; i < images.length; i++){
                             $('#orderLookUpPhotoPage .content').append('<img src=' + config.url.root + images[i].file_id + ' class="gallery" />');
                         }
                         $("#orderPhotoShowBtn").show();
+                        $("#brOrderPhoto").show();
+
                     }
                     else {
                         $("#orderPhotoShowBtn").hide();
+                        $("#brOrderPhoto").hide();
                     }
+                    $(".overlay_progress").hide();
                 });
             });
         }, 500);
@@ -1297,12 +1482,14 @@ $("document").ready(function()
     });
     $(document).on("click", ".orderAddBtn", function(){
         var cur_btn=$(this);
+        var validated = true;
+        var cur_hist = [];
+
         switch ($(cur_btn).attr('id')) {
             case 'orderAddBtn': {
                 var orderText = $("#orderText").val().trim();
                 var orderType = parseInt($("#orderType").val());
                 var orderAddress = parseInt($("#orderAddress").val());
-                var validated = true;
                 if(isNaN(orderType)) {
                     $('[for="orderType"][class="warning"]').show();
                     validated = false;
@@ -1381,7 +1568,6 @@ $("document").ready(function()
                 var feedbackphone = $("#feedbackphone").val().trim();
                 var feedbackemail= $("#feedbackemail").val().trim();
                 var feedText= $("#feedText").val().trim();
-                var validated = true;
                 if(feedbackfio=="")
                 {
                     $("[for=\"feedbackfio\"]").show();
@@ -1464,7 +1650,6 @@ $("document").ready(function()
                 var addrBuildSub = $("#addrBuildSub").val().trim();
                 var addrFlatSub = $("#addrFlatSub").val().trim();
 
-                var validated = true;
                 if(isNaN(addrCity))
                 {
                     $("[for=\"addrCity\"]").show();
@@ -1558,8 +1743,146 @@ $("document").ready(function()
                 }, 500);
             }
                 break;
+            case 'orderExecBtn': {
+                var orderExecText = $("#orderExecText").val().trim();
+                if(orderExecText == "") {
+                    $('[for="orderExecText"][class="warning"]').show();
+                    validated = false;
+                }
+                else {
+                    $('[for="orderExecText"][class="warning"]').hide();
+                }
+                if (validated!=true){
+                    alert(getTranslate("not_filled"));
+                    return validated;
+                };
+
+                setTimeout(function () {
+                    cur_hist[0] = {
+                        id: 0
+                        , d_history: "1111-11-1111:11:11"
+                        , t_position_id: cur_req.tpos
+                        , t_req_status_id: 4
+                        , note: orderExecText
+                        , sid: cur_req.idhist
+                        , userId: 1
+                    };
+                    var dataToPost = {
+                        sqlpath: 'exec_req_his'
+                        , t_request_id: cur_req.recid
+                        , t_user_id: 1
+                        , t_req_status_old: 3
+                        , req_flat: null
+                        , cur_hist: cur_hist
+                    };
+                    $.ajax({
+                        url: config.url.reqsHist,
+                        type: 'put',
+                        timeout: config.timeout,
+                        contentType: 'application/json;charset=UTF-8',
+                        async: true,
+                        data: JSON.stringify(dataToPost),
+                        beforeSend: function (xhr, opts) {
+                            $(".overlay_progress").show();
+                        },
+                        success: function (result) {
+                            $("#orderExecText").val('');
+                            refOrderList();
+                        },
+                        error: function(xhr, ajaxOptions, thrownError){
+                            alert('line 1666,'+JSON.stringify(thrownError));
+                            $(".overlay_progress").hide();
+                        }
+                    });
+                }, 500);
+
+            }
+                break;
+            case 'orderProcBtn': {
+                var orderDeadLine = $("#orderDeadLine").val();
+                if((orderDeadLine == "") || (orderDeadLine == null)) {
+                    $('[for="orderDeadLine"][class="warning"]').show();
+                    validated = false;
+                }
+                else {
+                    $('[for="orderDeadLine"][class="warning"]').hide();
+                }
+
+                var orderPriority = $("#orderPriority").val();
+                if((orderPriority == "") || (orderPriority == null)){
+                    $('[for="orderPriority"][class="warning"]').show();
+                    validated = false;
+                }
+                else {
+                    $('[for="orderPriority"][class="warning"]').hide();
+                }
+
+                var execPosType = $("#execPosType").val();
+                if((execPosType == "") || (execPosType == null)){
+                    $('[for="execPosType"][class="warning"]').show();
+                    validated = false;
+                }
+                else {
+                    $('[for="execPosType"][class="warning"]').hide();
+                }
+                var execPosition = $("#execPosition").val();
+                if((execPosition == null) || (execPosition == "")) {
+                    $('[for="execPosition"][class="warning"]').show();
+                    validated = false;
+                }
+                else {
+                    $('[for="execPosition"][class="warning"]').hide();
+                }
+                var orderProcText = $("#orderProcText").val().trim();
+                if (validated!=true){
+                    alert(getTranslate("not_filled"));
+                    return validated;
+                };
+
+                setTimeout(function () {
+                    cur_hist[0] = {
+                        id: 0
+                        , d_history: "1111-11-1111:11:11"
+                        , t_position_id: Number(execPosition)
+                        , t_req_status_id: 3
+                        , note: orderProcText
+                    };
+                    var dataToPost = {
+                        sqlpath: 'insert_req_his'
+                        , t_request_id: cur_req.recid
+                        , t_req_priority_id: Number(orderPriority)
+                        , dead_line: moment(orderDeadLine).format('YYYY-MM-DDHH:mm:ss')
+                        , req_status: 3
+                        , t_user_id: 1
+                        , t_req_status_old: cur_req.req_stat
+                        , req_flat: null
+                        , cur_hist: cur_hist
+                    };
+                    $.ajax({
+                        url: config.url.reqsHist,
+                        type: 'put',
+                        timeout: config.timeout,
+                        contentType: 'application/json;charset=UTF-8',
+                        async: true,
+                        data: JSON.stringify(dataToPost),
+                        beforeSend: function (xhr, opts) {
+                            $(".overlay_progress").show();
+                        },
+                        success: function (result) {
+                            $("#orderDeadLine").val('');
+                            $("#orderProcText").val('');
+                            refOrderList();
+                        },
+                        error: function(xhr, ajaxOptions, thrownError){
+                            alert('line 1666,'+JSON.stringify(thrownError));
+                            $(".overlay_progress").hide();
+                        }
+                    });
+                }, 500);
+            }
+                break;
             default:
-                alert("Неизвестная кнопка");
+                alert("Неизвестная кнопка - "+$(cur_btn).attr('id'));
         }
     });
     $(document).on("click", "#visiblePassword", function(){
@@ -1734,6 +2057,13 @@ $("document").ready(function()
             alert('line 1653,'+e.message);
         }
     });
+    $(document).on("click", "#orderExecute", function(){
+        document.location.href="#orderExecPage";
+    });
+    $(document).on("click", "#orderProc", function(){
+        //alert('onclick orderExecute');
+        document.location.href="#orderProcPage";
+    });
 
     $(document).on("keyup", "#passwordField", function(){
         if ($(this).val()) {
@@ -1743,6 +2073,7 @@ $("document").ready(function()
             $("#visiblePassword").removeClass("visiblePassword-show");
         }
     });
+
     $(document).on("change", "#languageList", function(){
         updateLanguage();
         $(".page").hide();
@@ -1769,9 +2100,11 @@ $("document").ready(function()
         config.user_cab=$("#cabinetList").val();
         //alert("user_cab="+user_cab);
         if (config.user_cab==1){
+            $("#li_notif").hide();
             document.location.hash = "orderListPage";
         }
         else {
+            $("#li_notif").show();
             document.location.hash = "notifyListPage";
         }
     });
@@ -1793,4 +2126,9 @@ $("document").ready(function()
             });
         }
     });
+    $(document).on("change", "#execPosType", function(){
+        //alert("execPosType.change="+$("#execPosType").val());
+        crObjList('execPosition', 'execPosition');
+    });
+
 });

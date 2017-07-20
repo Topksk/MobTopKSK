@@ -1,3 +1,5 @@
+//var rhost="https://192.168.108.10/";
+//var rhost="https://demo.topksk.kz/";
 var rhost="https://topksk.kz/";
 var config = {
     timeout: 90000,
@@ -17,7 +19,9 @@ var config = {
         imageUrl: rhost + "sprav/subid",
         logout: rhost + "logout",
         execFunc : rhost + "reqs/execFunc",
-        auth_chk: rhost + "auth?check_auths_sn"
+        auth_chk: rhost + "auth?check_auths_sn",
+        orderList2: "sprav/reqs_by_executor",
+        reqsHist: rhost + "reqs/history"
     },
     lang: function() {
         return (localStorage.getItem("lang") == "KAZ") ? 2 : 1;

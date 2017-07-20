@@ -12,9 +12,9 @@
 		<script type="text/javascript" charset="utf-8" src="js/jquery.min.js"></script>
 		<script type="text/javascript" charset="utf-8" src="js/hammer.min.js"></script>
 		<script type="text/javascript" charset="utf-8" src="js/jquery.hammer.js"></script>
-		<script type="text/javascript" charset="utf-8" src="js/config.js"></script>
 		<script type="text/javascript" charset="utf-8" src="cordova.js"></script>
 		<script type="text/javascript" charset="utf-8" src="index.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/config.js"></script>
 		<script type="text/javascript" charset="utf-8" src="js/KAZ.js"></script>
 		<script type="text/javascript" charset="utf-8" src="js/RUS.js"></script>
 		<script type="text/javascript" charset="utf-8" src="js/tmpl.min.js"></script>
@@ -34,18 +34,18 @@
 		<div class="slideMenu">
 			<ul class="menuList">
 				<li class="header" id="firstName"></li>
-				<li link="notifyListPage">{%=o.notify_list_header%}</li>
+				<li link="notifyListPage" id="li_notif">{%=o.notify_list_header%}</li>
 				<li link="orderListPage">{%=o.order_list_header%}</li>
-				<li link="addrListPage">{%=o.address_list%}</li>
+				<li link="addrListPage" id="li_adr">{%=o.address_list%}</li>
 				<li link="languagePage">{%=o.language%}</li>
-				<!--li link="cabinetPage" id="li_cab">{%=o.choos_cab%}</li-->
+				<li link="cabinetPage" id="li_cab">{%=o.choos_cab%}</li>
 				<li link="exit">{%=o.exit%}</li>
 			</ul>
 		</div>
 
 		<div class="page" id="mainPage">
 				<div class="header">
-					<span class = "header_text" id="label_header">Войти в систему</span>
+					<span class = "header_text" id="label_header">{%=o.login_header_text%}</span>
 					<span class = "language">&nbsp;</span>
 				</div>
 				<div class="content">
@@ -139,9 +139,6 @@
 						<option value="2">{%=o.readed%}</option>
 						<option value="3">{%=o.sended%}</option>
 					</select>
-					<!--select class="listofitem" id="notifyStatus">
-						<option></option>
-					</select-->
 					<label>{%=o.notify_data%}</label>
 					<input type="date" id="notifyDate" />
 					<input type="button" value="{%=o.search%}" id="notifyFilterSearchBtn" />
@@ -226,9 +223,6 @@
 					<!--select class="select2-searchable" id="orderFilterType"></select-->
 					<!--select class="select2-searchable" id="orderFilterAddress"></select-->
 					<select class="select2-searchable" id="orderFilterStatus"></select>
-					<!--select class="listofitem" id="orderReqSubType">
-						<option>{%=o.order_sub_reqtype%}</option>
-					</select-->
 					<input type="date" placeholder="{%=o.order_date_from%}" id="orderDateFrom" />
 					<input type="date" placeholder="{%=o.order_date_to%}" id="orderDateTo" />
 					<input type="button" value="{%=o.search%}" id="orderFilterBtn" />
@@ -240,7 +234,7 @@
 		<div class="page" id="orderListPage">
 			<div class="header">
 				<span class = "menuBtn"></span>
-				<span class = "header_text">{%=o.order_list_header%}</span>
+				<span class = "header_text" id="orderListHeader">{%=o.order_list_header%}</span>
 				<a href="#orderFilterPage" class="search"></a>
 			</div>
             
@@ -259,22 +253,65 @@
 				<div class="form">
 					<label for="orderIdLookUp">{%=o.orderId%}</label>
 					<input type="text" placeholder="" id="orderIdLookUp" name="orderIdLookUp" readonly />
-					<!--label for="orderSubTypeLookUp">{%=o.order_sub_reqtype%}</label>
-					<input type="text" placeholder="" id="orderSubTypeLookUp" name="orderSubTypeLookUp" readonly /-->
 					<label for="orderTypeLookUp">{%=o.order_type%}</label>
 					<input type="text" placeholder="" id="orderTypeLookUp" name="orderTypeLookUp" readonly />
 					<label for="orderAddressLookUp">{%=o.order_address%}</label>
 					<input type="text" placeholder="" id="orderAddressLookUp" name="orderAddressLookUp" readonly />
-					<!--label for="orderUrgentLookUp">{%=o.order_urgent%}</label>
-					<input type="text" placeholder="" id="orderUrgentLookUp" name="orderUrgentLookUp" readonly /-->
 					<label for="orderFinishTimeLookUp">{%=o.order_finish_time%}</label>
 					<input type="text" placeholder="" id="orderFinishTimeLookUp" name="orderFinishTimeLookUp" readonly />
 					<label for="orderLookUpText">{%=o.order_text%}</label>
 					<textarea id="orderLookUpText" readonly></textarea>
 					<input type="button" value="{%=o.order_photos%}" id="orderPhotoShowBtn" name="orderPhotoShowBtn" />
+					<br id="brOrderPhoto"/>
+					<input type="button" value="{%=o.execution%}" id="orderExecute" name="orderExecute" />
+					<input type="button" value="{%=o.processing%}" id="orderProc" name="orderProc" />
 				</div>
 			</div>            
 		</div>
+
+		<!-- Выполнение заявки -->
+		<div class="page" id="orderExecPage">
+			<div class="header">
+				<a class = "backBtn" href="#orderLookUpPage"></a>
+				<span class = "header_text">{%=o.execution%}</span>
+				<span class = "orderAddBtn" id="orderExecBtn"> </span>
+			</div>
+			<div class="content">
+				<div class="form">
+					<label for="orderExecText">{%=o.descr%}</label>
+					<label for="orderExecText" class="warning">{%=o.not_filled%}</label>
+					<textarea id="orderExecText"></textarea>
+				</div>
+			</div>
+		</div>
+
+		<!-- Назначение заявки -->
+		<div class="page" id="orderProcPage">
+			<div class="header">
+				<a class = "backBtn" href="#orderLookUpPage"></a>
+				<span class = "header_text">{%=o.processing%}</span>
+				<span class = "orderAddBtn" id="orderProcBtn"> </span>
+			</div>
+			<div class="content">
+				<div class="form">
+					<label for="orderDeadLine" class="warning">{%=o.not_filled%}</label>
+					<input type="date" placeholder="{%=o.order_finish_time%}" id="orderDeadLine" />
+					<label for="orderPriority">{%=o.order_urgent%}</label>
+					<label for="orderPriority" class="warning">{%=o.not_filled%}</label>
+					<select class="listofitem2" id="orderPriority"></select>
+
+					<label for="execPosType">{%=o.position_type%}</label>
+					<label for="execPosType" class="warning">{%=o.not_filled%}</label>
+					<select class="listofitem2" id="execPosType"></select>
+					<label for="execPosition">{%=o.fullName%}</label>
+					<label for="execPosition" class="warning">{%=o.not_filled%}</label>
+					<select class="select2-searchable" id="execPosition"></select>
+					<label for="orderProcText">{%=o.descr%}</label>
+					<textarea id="orderProcText"></textarea>
+				</div>
+			</div>
+		</div>
+
 
 		<div class="page" id="orderLookUpPhotoPage">
 			<div class="header">

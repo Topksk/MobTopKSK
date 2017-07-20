@@ -1,5 +1,5 @@
 var KAZ = {
-    "login_header_text": "TopKSK жүйесіне кіру",
+    "login_header_text": "TopKSK-ға кіру",
     "login": "Логин",
     "password": "Құпия сөз",
     "login_btn_text": "Кіру",
@@ -76,5 +76,11 @@ var KAZ = {
     "fb_auth": "Facebook арқылы кіру",
     "choos_cab": "Кабинет таңдау",
     "citizs": "Жеке кабинет",
-    "ksks": "КСК кабинеті"
+    "ksks": "КСК кабинеті",
+    "email_activ": "Қате логин немесе логин белсендірілмеді, электрондық поштаңызды тексеріңіз.",
+    "execution": "Орындалу",
+    "descr": "Сипаттамасы",
+    "processing": "Тапсыру",
+    "position_type": "Лауазымы",
+    "fullName": "ТАӘ"
 };

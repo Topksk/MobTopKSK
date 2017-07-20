@@ -1,3 +1,6 @@
+var AppVer='000';
+//alert('index.js');
+
 var app = {
     // Application Constructor
     initialize: function() {
@@ -28,8 +31,12 @@ var app = {
 
         //alert(StatusBar);
         //alert(JSON.stringify(StatusBar));
+        //alert('1.ind.js, AppVersion='+AppVersion.version);
+        AppVer=AppVersion.version;
         app.receivedEvent('deviceready');
-
+        //alert('ind.js, AppVer2='+AppVer2);
+        //alert('label_header='+$("#label_header").text());
+        $("#label_header").text(getTranslate("login_header_text")+", v "+AppVer);
     },
     // Update DOM on a Received Event
     receivedEvent: function(id) {
@@ -39,3 +46,6 @@ var app = {
         }
     }
 };
+
+//alert('2.ind.js, AppVersion='+AppVersion.version);
+//alert('end, ind.js, AppVer='+AppVer);
