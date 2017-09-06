@@ -965,7 +965,7 @@ $("document").ready(function()
         if ($("#orderFilterStatus").val() == null){
             if (config.user_cab==1) {
                 nOrderStatus= 0;
-                $('#orderFilterStatus').prop("selectedIndex", nOrderStatus).trigger("change");
+                $('#orderFilterStatus').prop("selectedIndex", 1).trigger("change");
             }
         }
         else {
@@ -973,14 +973,20 @@ $("document").ready(function()
         }
         var req_url=config.url.orderList;
         var dataToPost;
-        if (config.user_cab==1) {
+        if (config.user_cab==1) {       //  ksk_cab
             req_url=config.url.spr_oth;
             if($("#orderId").val().trim() == "") {
-                if (nOrderStatus==0) {
-                    nOrderStatus='{1,2,3,7}';
+                if (nOrderStatus==-1) {
+                    nOrderStatus='{1,2,3,4,5,6,7,8,9}';
                 }
                 else {
-                    nOrderStatus='{'+ nOrderStatus+'}';
+                    if (nOrderStatus==0) {
+                        nOrderStatus='{1,2,3,4,7,9}';
+                    }
+                    else {
+                        nOrderStatus='{5,6,8}';
+                    }
+                    //nOrderStatus='{'+ nOrderStatus+'}';
                 };
 
                 dataToPost = {
